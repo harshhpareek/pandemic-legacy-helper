@@ -4,7 +4,9 @@ export interface TState {
   player1Name: string
   player2Name: string
   player3Name: string
-  fundingLevel: 2
+  fundingLevel: number
+  // Game State
+  history: TPlayerMove[]
 }
 
 // For the player deck, we will not track individual player cards, just the colour
@@ -16,3 +18,5 @@ export type TBlackInfectionCard = 'Algiers' | 'Baghdad' | 'Cairo' | 'Chennai' | 
 export type TYellowInfectionCard = 'Bogota' | 'Buenos Aries' | 'Johannesburg' | 'Khartoum' | 'Kinshasa' | 'Lagos' | 'Lima' | 'Los Angeles' | 'Mexico City' | 'Miami' | 'Santiago' | 'Sao Paulo'
 export type TRedInfectionCard = 'Bangkok' | 'Beijing' | 'Ho Chi Minh City' | 'Hong Kong' | 'Jakarta' | 'Manila' | 'Osaka' | 'Seoul' | 'Shanghai' | 'Sydney' | 'Taipei' | 'Tokyo'
 export type TInfectionCard = TBlueInfectionCard | TBlackInfectionCard | TYellowInfectionCard | TRedInfectionCard
+
+export type TPlayerMove = [playerCards: [TPlayerCard, TPlayerCard], infectionCards: TInfectionCard[]]

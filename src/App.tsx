@@ -38,7 +38,10 @@ export default function App (): globalThis.JSX.Element {
     player1Name: 'P1',
     player2Name: 'P2',
     player3Name: 'P3',
-    fundingLevel: 2
+    fundingLevel: 4,
+
+    // Game state
+    history: []
   })
   return (
     <Container maxWidth="sm">
