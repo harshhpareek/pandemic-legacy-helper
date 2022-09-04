@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from "react";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import  {TState} from "../types"
+import React from 'react'
+import Button from '@mui/material/Button'
+import TextField from '@mui/material/TextField'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogContentText from '@mui/material/DialogContentText'
+import DialogTitle from '@mui/material/DialogTitle'
+import { TState } from '../types'
 
-type SettingsProps = {
-    show: boolean,
-    onClose: (event: {}) => void,
-    parentState: TState,
-    setParentState:  React.Dispatch<React.SetStateAction<TState>>
+interface SettingsProps {
+  show: boolean
+  onClose: (event: {}) => void
+  parentState: TState
+  setParentState: React.Dispatch<React.SetStateAction<TState>>
 }
 
-const SettingsModal = (props: SettingsProps) => {
+export default function SettingsModal (props: SettingsProps): JSX.Element {
   return (
     <Dialog open={props.show} onClose={props.onClose}>
       <DialogTitle>Settings</DialogTitle>
@@ -63,11 +63,12 @@ const SettingsModal = (props: SettingsProps) => {
         <p></p>
         <Button
           onClick={() =>
-            props.setParentState((current: TState) => ({ ...current,
+            props.setParentState((current: TState) => ({
+              ...current,
               player0Name: props.parentState.player3Name,
               player1Name: props.parentState.player0Name,
               player2Name: props.parentState.player1Name,
-              player3Name: props.parentState.player2Name,
+              player3Name: props.parentState.player2Name
             }))
           }
         >
@@ -78,7 +79,5 @@ const SettingsModal = (props: SettingsProps) => {
         <Button onClick={props.onClose}>Close</Button>
       </DialogActions>
     </Dialog>
-  );
-};
-
-export default SettingsModal;
+  )
+}

@@ -5,16 +5,13 @@
   "dependencies": {
     "@emotion/react": "latest",
     "@emotion/styled": "latest",
+    "@mdi/js": "latest",
+    "@mdi/react": "latest",
+    "@mui/icons-material": "latest",
     "@mui/material": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "react-scripts": "latest",
-    "typescript": "latest",
-    "@mui/icons-material": "latest",
-    "@mdi/js": "latest",
-    "@mdi/react": "latest"
+    "react-scripts": "latest"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -33,5 +30,17 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.18",
+    "@types/react-dom": "^18.0.6",
+    "@typescript-eslint/eslint-plugin": "^5.36.1",
+    "eslint": "^8.23.0",
+    "eslint-config-standard-with-typescript": "^22.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.2.5",
+    "eslint-plugin-promise": "^6.0.1",
+    "eslint-plugin-react": "^7.31.5",
+    "typescript": "^4.8.2"
   }
 }
