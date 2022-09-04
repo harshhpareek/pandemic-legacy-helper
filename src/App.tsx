@@ -3,7 +3,7 @@ import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import SettingsModal from "./components/SettingsModal";
-import { TState } from './types';
+import { TState, TPlayerCard } from './types';
 import Button from '@mui/material/Button';
 import IndeterminateCheckBoxOutlinedIcon from "@mui/icons-material/IndeterminateCheckBoxOutlined";
 import CoronavirusOutlinedIcon from "@mui/icons-material/CoronavirusOutlined";
@@ -21,13 +21,12 @@ declare namespace JSX {
   }
 }
 
-function displayIcon(card: string): globalThis.JSX.Element {
+function playerCardIcon(card: TPlayerCard): globalThis.JSX.Element {
   switch (card) {
     case "_":
       return <IndeterminateCheckBoxOutlinedIcon />;
     case "Epidemic":
       return <Icon path={mdiBiohazard} color="red" size="25" />;
-    // return <CoronavirusOutlinedIcon />;
     case "Black":
       return <CoronavirusOutlinedIcon sx={{ color: "black" }} />;
     case "Yellow":
@@ -38,8 +37,6 @@ function displayIcon(card: string): globalThis.JSX.Element {
       return <CoronavirusOutlinedIcon color="error" />;
     case "Funded":
       return <CurrencyBitcoinIcon color="success" />;
-    default:
-      throw "Type Error in displayIcon";
   }
 }
 
@@ -62,18 +59,17 @@ export default function App() {
         </Typography>
         <Button variant="contained"
           onClick={() => setShowSettings(true)}
-
         >
           Settings
         </Button>
-        <SettingsModal
+        {showSettings && <SettingsModal
           onClose={() => {
             setShowSettings(false);
           }}
           show={showSettings}
           parentState={state}
           setParentState={setState}
-        />
+        />}
         <Typography variant="h4" component="h1" gutterBottom>
           Setup instructions
         </Typography>
@@ -101,20 +97,22 @@ export default function App() {
             </li>
           </ul>
         </div>
-        Enter Rounds
-        <p></p>Glossary
+        <h3>Enter Rounds </h3>
+        <p />Glossary
         <ul>
           <li>
             <IndeterminateCheckBoxOutlinedIcon />: Not entered yet
           </li>
-          <li>{displayIcon("Epidemic")}: Epidemic</li>
-          <li>{displayIcon("Black")}: Black city player card</li>
-          <li>{displayIcon("Yellow")}: Yellow city player card</li>
-          <li>{displayIcon("Blue")}: Blue city player card</li>
-          <li>{displayIcon("Red")}: Red city player card</li>
-          <li>{displayIcon("Funded")}: Funded event</li>
+          <li>{playerCardIcon("Epidemic")}: Epidemic</li>
+          <li>{playerCardIcon("Black")}: Black city player card</li>
+          <li>{playerCardIcon("Yellow")}: Yellow city player card</li>
+          <li>{playerCardIcon("Blue")}: Blue city player card</li>
+          <li>{playerCardIcon("Red")}: Red city player card</li>
+          <li>{playerCardIcon("Funded")}: Funded event</li>
         </ul>
-        {JSON.stringify(state)}
+
+        <h3>(Debug) State</h3>
+        <pre>{JSON.stringify(state, null, 2)}</pre>
       </Box>
     </Container>
   );
