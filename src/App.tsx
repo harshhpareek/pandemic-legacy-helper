@@ -13,13 +13,14 @@ export default class App extends React.Component<{}, TState> {
   state: TState = {
     // Game Setup settings
     players: ['HP', 'CJ', 'MT', 'SK'],
+    playerColors: ['Blue', 'Black', 'White', 'Pink'],
     fundingLevel: 4,
     positionToPlayerId: [0, 1, 2, 3],
 
     // Game state
     history: [
       { player_id: 0, playerCards: ['Red', 'Blue'], infectionCards: ['Atlanta', 'Chicago'] },
-      { player_id: 1, playerCards: ['Yellow', 'Epidemic'], infectionCards: ['Algiers', 'Osaka'] }
+      { player_id: 1, playerCards: ['Yellow', 'Epidemic'], infectionCards: ['Algiers', 'Osaka', 'Kinshasa'] }
     ]
   }
 
@@ -72,10 +73,9 @@ export default class App extends React.Component<{}, TState> {
           </Typography>
           <p></p>
           Click to update player initials below and select pawn colors. Drag to reorder players.
-          <DraggableAvatarStack players={this.state.players} positionToPlayerId={this.state.positionToPlayerId} setState={this.setState} />
+          <DraggableAvatarStack players={this.state.players} playerColors={this.state.playerColors} positionToPlayerId={this.state.positionToPlayerId} setState={this.setState} />
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>Game Log</Typography>
-          <p></p>
           <GameLog history={this.state.history} />
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Glossary </Typography>

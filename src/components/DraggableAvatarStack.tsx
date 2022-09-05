@@ -5,34 +5,14 @@ import {
   DragDropContext,
   Droppable, DropResult, Draggable
 } from 'react-beautiful-dnd'
-import { TState } from '../types'
+import { pawnColor, TPawnColor, TState } from '../types'
 import Stack from '@mui/material/Stack'
 import NameDialog from './NameDialog'
 
-function stringToColor (string: string): string {
-  let hash = 0
-  let i
-
-  /* eslint-disable no-bitwise */
-  for (i = 0; i < string.length; i += 1) {
-    hash = string.charCodeAt(i) + ((hash << 5) - hash)
-  }
-
-  let color = '#'
-
-  for (i = 0; i < 3; i += 1) {
-    const value = (hash >> (i * 8)) & 0xff
-    color += `00${value.toString(16)}`.slice(-2)
-  }
-  /* eslint-enable no-bitwise */
-
-  return color
-}
-
-export function stringAvatar (name: string): { sx: { bgcolor: string }, children: string } {
+export function stringAvatar (name: string, color: TPawnColor): { sx: { bgcolor: string }, children: string } {
   return {
     sx: {
-      bgcolor: stringToColor(name + '__slt__')
+      bgcolor: pawnColor(color)
     },
     children: name.length === 2 ? name : (name.includes(' ') ? `${name.split(' ')[0][0]}${name.split(' ')[1][0]}` : name[0])
   }
@@ -40,6 +20,7 @@ export function stringAvatar (name: string): { sx: { bgcolor: string }, children
 
 interface TAvatarProps {
   players: string[]
+  playerColors: TPawnColor[]
   positionToPlayerId: number[]
   setState: React.Dispatch<React.SetStateAction<TState>>
 }
@@ -77,42 +58,47 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
 
   render (): React.ReactNode {
     return (
-            <DragDropContext onDragEnd={this.onDragEnd}>
-                <Droppable droppableId="avatars" direction="horizontal">
-                    {(provided, snapshot) => (
+      <DragDropContext onDragEnd={this.onDragEnd}>
+        <Droppable droppableId="avatars" direction="horizontal">
+          {(provided, snapshot) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              <Stack direction="row" spacing={2}>
+                {this.props.positionToPlayerId.map((playerId, position) => {
+                  const [showNameDialog, setShowNameDialog] = React.useState(false)
+                  return (
+                    <Draggable key={playerId} draggableId={String(playerId)} index={position}>
+                      {(provided, snapshot) => (
                         <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
                         >
-                            <Stack direction="row" spacing={2}>
-                                {this.props.positionToPlayerId.map((playerId, position) => {
-                                  const [showNameDialog, setShowNameDialog] = React.useState(false)
-                                  return (
-                                        <Draggable key={playerId} draggableId={String(playerId)} index={position}>
-                                            {(provided, snapshot) => (
-                                                <div
-                                                    ref={provided.innerRef}
-                                                    {...provided.draggableProps}
-                                                    {...provided.dragHandleProps}
-                                                >
-                                                    <NameDialog
-                                                        show={showNameDialog}
-                                                        value={this.props.players[playerId]}
-                                                        onClose={() => { setShowNameDialog(false) }}
-                                                        onChange={(name: string) => {
-                                                          this.props.setState((current: TState) =>
-                                                            ({ ...current, players: this.props.players.map((oldName, j) => (j === playerId ? name : oldName)) }))
-                                                        }} />
-                                                    <Avatar component={Paper} elevation={5} {...stringAvatar(this.props.players[playerId])} onClick={() => { setShowNameDialog(true) }} />
-                                                </div>)}
-                                        </Draggable>)
-                                })}
-                            </Stack>
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </Droppable>
-            </DragDropContext>
+                          <NameDialog
+                            show={showNameDialog}
+                            name={this.props.players[playerId]}
+                            color={this.props.playerColors[playerId]}
+                            onClose={() => { setShowNameDialog(false) }}
+                            onChangeName={(name: string) => {
+                              this.props.setState((current: TState) =>
+                                ({ ...current, players: this.props.players.map((oldName, j) => (j === playerId ? name : oldName)) }))
+                            }}
+                            onChangeColor={(color: TPawnColor) => {
+                              this.props.setState((current: TState) =>
+                                ({ ...current, playerColors: this.props.playerColors.map((oldColor, j) => (j === playerId ? color : oldColor)) }))
+                            }} />
+                          <Avatar component={Paper} elevation={5} {...stringAvatar(this.props.players[playerId], this.props.playerColors[playerId])} onClick={() => { setShowNameDialog(true) }} />
+                        </div>)}
+                    </Draggable>)
+                })}
+              </Stack>
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
 
     )
   }

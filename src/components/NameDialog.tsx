@@ -3,14 +3,21 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
 import TextField from '@mui/material/TextField'
 import React from 'react'
+import { TPawnColor } from '../types'
 
 interface NameDialogProps {
   show: boolean
-  value: string
+  name: string
+  color: string
   onClose: React.MouseEventHandler
-  onChange: (value: string) => void
+  onChangeName: (value: string) => void
+  onChangeColor: (value: TPawnColor) => void
 }
 
 export default function NameDialog (props: NameDialogProps): JSX.Element {
@@ -22,11 +29,28 @@ export default function NameDialog (props: NameDialogProps): JSX.Element {
           label="Initials"
           variant="standard"
           size="small"
-          value={props.value}
+          value={props.name}
           onChange={(event) =>
-            props.onChange(event.target.value)
+            props.onChangeName(event.target.value)
           }
         />
+        <p></p>
+        <FormControl>
+          <InputLabel>Color</InputLabel>
+          <Select
+            value={props.color}
+            label="Age"
+            onChange={(event) => {
+              const color = event.target.value as TPawnColor
+              props.onChangeColor(color)
+            }}
+          >
+            <MenuItem value='Blue'>Blue</MenuItem>
+            <MenuItem value='Pink'>Pink</MenuItem>
+            <MenuItem value='White'>White</MenuItem>
+            <MenuItem value='Black'>White</MenuItem>
+          </Select>
+        </FormControl>
       </DialogContent>
       <DialogActions>
         <Button onClick={props.onClose}>Close</Button>

@@ -6,26 +6,66 @@ import CoronavirusOutlinedIcon from '@mui/icons-material/CoronavirusOutlined'
 import CurrencyBitcoinIcon from '@mui/icons-material/CurrencyBitcoin'
 import IndeterminateCheckBoxOutlinedIcon from '@mui/icons-material/IndeterminateCheckBoxOutlined'
 
+import { grey, pink, indigo } from '@mui/material/colors'
+
 export interface TState {
   // Game Setup settings
   players: string[]
+  playerColors: TPawnColor[]
   fundingLevel: number
   positionToPlayerId: number[]
   // Game State
   history: TPlayerMove[]
 }
 
+export type TPawnColor = 'Blue' | 'Pink' | 'White' | 'Black'
+
+export function pawnColor (color: TPawnColor): string {
+  switch (color) {
+    case 'Blue':
+      return indigo[400]
+    case 'Pink':
+      return pink[400]
+    case 'White':
+      return grey[300]
+    case 'Black':
+      return grey[800]
+  }
+}
+
 // For the player deck, we will not track individual player cards, just the colour
 export type TPlayerCard = '_' | 'Epidemic' | 'Black' | 'Yellow' | 'Blue' | 'Red' | 'Funded'
 
 // For the Infection Deck, we will track each card
-export type TBlueInfectionCard = 'Atlanta' | 'Chicago' | 'Essen' | 'London' | 'Madrid' | 'Milan' | 'Montreal' | 'New York' | 'Paris' | 'San Francisco' | 'St. Petersburg' | 'Washington'
-export type TBlackInfectionCard = 'Algiers' | 'Baghdad' | 'Cairo' | 'Chennai' | 'Delhi' | 'Istanbul' | 'Karachi' | 'Kolkata' | 'Moscow' | 'Mumbai' | 'Riyadh' | 'Tehran'
-export type TYellowInfectionCard = 'Bogota' | 'Buenos Aries' | 'Johannesburg' | 'Khartoum' | 'Kinshasa' | 'Lagos' | 'Lima' | 'Los Angeles' | 'Mexico City' | 'Miami' | 'Santiago' | 'Sao Paulo'
-export type TRedInfectionCard = 'Bangkok' | 'Beijing' | 'Ho Chi Minh City' | 'Hong Kong' | 'Jakarta' | 'Manila' | 'Osaka' | 'Seoul' | 'Shanghai' | 'Sydney' | 'Taipei' | 'Tokyo'
+const BlueCities = ['Atlanta', 'Chicago', 'Essen', 'London', 'Madrid', 'Milan', 'Montreal', 'New York', 'Paris', 'San Francisco', 'St. Petersburg', 'Washington'] as const
+const BlackCities = ['Algiers', 'Baghdad', 'Cairo', 'Chennai', 'Delhi', 'Istanbul', 'Karachi', 'Kolkata', 'Moscow', 'Mumbai', 'Riyadh', 'Tehran'] as const
+const YellowCities = ['Bogota', 'Buenos Aries', 'Johannesburg', 'Khartoum', 'Kinshasa', 'Lagos', 'Lima', 'Los Angeles', 'Mexico City', 'Miami', 'Santiago', 'Sao Paulo'] as const
+const RedCities = ['Bangkok', 'Beijing', 'Ho Chi Minh City', 'Hong Kong', 'Jakarta', 'Manila', 'Osaka', 'Seoul', 'Shanghai', 'Sydney', 'Taipei', 'Tokyo'] as const
+
+export type TBlueInfectionCard = typeof BlueCities[number]
+export type TBlackInfectionCard = typeof BlackCities[number]
+export type TYellowInfectionCard = typeof YellowCities[number]
+export type TRedInfectionCard = typeof RedCities[number]
 export type TInfectionCard = TBlueInfectionCard | TBlackInfectionCard | TYellowInfectionCard | TRedInfectionCard
 
-export interface TPlayerMove {player_id: number, playerCards: [TPlayerCard, TPlayerCard], infectionCards: TInfectionCard[]}
+export function infectionCardColor (card: TInfectionCard): string {
+  if (BlueCities.find((city) => card === city) !== undefined) {
+    console.log('blue')
+    return 'blue'
+  }
+  if (BlackCities.find((city) => card === city) !== undefined) {
+    return 'black'
+  }
+  if (YellowCities.find((city) => card === city) !== undefined) {
+    return 'orange'
+  }
+  if (RedCities.find((city) => card === city) !== undefined) {
+    return 'red'
+  }
+  return 'black'
+}
+
+export interface TPlayerMove { player_id: number, playerCards: [TPlayerCard, TPlayerCard], infectionCards: TInfectionCard[] }
 
 export function playerCardIcon (card: TPlayerCard): globalThis.JSX.Element {
   switch (card) {
