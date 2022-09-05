@@ -22,6 +22,7 @@ import {
 import { TState, TPlayerCard } from './types'
 import Stack from '@mui/material/Stack'
 import NameDialog from './components/NameDialog'
+import Link from '@mui/material/Link'
 
 function stringToColor (string: string): string {
   let hash = 0
@@ -86,6 +87,7 @@ function BackgroundLetterAvatars (props: TAvatarProps): JSX.Element {
     }))
   }
   return (
+    <Box>
     <DragDropContext onDragEnd={onDragEnd}>
       <Droppable droppableId="avatars" direction="horizontal">
         {(provided, snapshot) => (
@@ -123,6 +125,7 @@ function BackgroundLetterAvatars (props: TAvatarProps): JSX.Element {
         )}
       </Droppable>
     </DragDropContext>
+    </Box>
   )
 }
 
@@ -151,14 +154,14 @@ function renderHistory (props: ListChildComponentProps): JSX.Element {
     <ListItem style={style} key={index} component="div" disablePadding>
       <ListItem>
         <Avatar {...stringAvatar('Harsh Pareek')} />
-        <ListItemText primary="drew" />
+        <ListItemText primary="drew" sx={{ color: 'blue' }} inset/>
         <ListItemButton dense sx={{ width: '2%' }}>
           <ListItemIcon>{playerCardIcon(data[index].playerCards[0])} </ListItemIcon>
         </ListItemButton>
         <ListItemButton dense sx={{ width: '2%' }}>
           <ListItemIcon>{playerCardIcon(data[index].playerCards[1])} </ListItemIcon>
         </ListItemButton>
-        <ListItemText primary="infected" />
+        <ListItemText primary="infected" sx={{ color: 'green' }} inset />
         <ListItemButton>
           <ListItemText primary="Kinshasa" />
         </ListItemButton>
@@ -181,10 +184,18 @@ export default function App (): globalThis.JSX.Element {
     history: [{ player_id: 0, playerCards: ['Red', 'Blue'], infectionCards: ['Atlanta', 'Chicago'] }, { player_id: 1, playerCards: ['Yellow', 'Epidemic'], infectionCards: ['Algiers', 'Osaka'] }]
   })
   return (
-    <Container maxWidth="sm">
-      <Box sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Pandemic Card Counter
+    <Container>
+      <Box>
+        <Typography variant="h3" component="h3" gutterBottom>
+          Game Setup
+        </Typography>
+        Follow the <Link href="https://www.boardgamebarrister.com/unboxing-pandemic-legacy/" target="_blank" rel="noopener">Legacy Season 1 setup guide </Link>:
+        <Typography variant="h5" component="h1" gutterBottom>
+          Steps 1-4: Infect 9 cities
+        </Typography>
+        Enter the cities here:
+        <Typography variant="h5" component="h1" gutterBottom>
+          Steps 5-6: Add funded events to player deck and deal cards
         </Typography>
         <TextField
           label="Funding Level"
@@ -198,37 +209,21 @@ export default function App (): globalThis.JSX.Element {
             setState((current: TState) => ({ ...current, fundingLevel: Number(event.target.value) }))
           }
         />
-        <Typography variant="h5" component="h1" gutterBottom>
-          Player Order
-        </Typography>
-        <BackgroundLetterAvatars players={state.players} positionToPlayerId={state.positionToPlayerId} setState={setState} />
-        <div>
-          <p>
-            Enter <u>player names</u> or initials in Settings, and enter the{' '}
-            <u>funding level</u>.
-          </p>
-
-          <p>Follow the manual, but pay attention to the following:</p>
-          <ul>
-            <li>
-              Shuffle the <span style={{ color: 'green' }}>infection</span>{' '}
-              deck. Do the initial{' '}
-              <span style={{ color: 'green' }}>infection</span> step: 3 cities
-              with 3 cubes, 3 cities with 2 cubes, blah blah. You can select
-              funded events after this step.
-            </li>
-            <li>
-              Shuffle the <span style={{ color: 'blue' }}>player</span> deck.
-              Give two cards to each player. This page assumes 4 players. You
+        Give two cards to each player. This page assumes 4 players. You
               should now have <b>40 cards</b>. Add funded events. Split into 5
               piles and add <span style={{ color: 'red' }}>Epidemic</span>{' '}
               cards.
-            </li>
-          </ul>
-        </div>
+        Cards dealt:
+        The position by which epidemics MUST occur are:
+        <Typography variant="h5" component="h1" gutterBottom>
+          Step 7-10: Player names, order and colors
+        </Typography>
+        Click to update player initials below and select pawn colors. Drag to reorder players.
+        <BackgroundLetterAvatars players={state.players} positionToPlayerId={state.positionToPlayerId} setState={setState} />
+
         <h3> Game Log </h3>
 
-        <Paper sx={{ width: '100%', height: 400, maxWidth: 600, bgcolor: 'background.paper' }} elevation={3}>
+        <Paper sx={{ width: '100%', height: 400, maxWidth: 900, bgcolor: 'background.paper' }} elevation={3}>
           <FixedSizeList
             height={400}
             width={600}
