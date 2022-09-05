@@ -11,7 +11,8 @@
     "@mui/material": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "react-scripts": "latest"
+    "react-scripts": "latest",
+    "react-window": "latest"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -34,6 +35,7 @@
   "devDependencies": {
     "@types/react": "^18.0.18",
     "@types/react-dom": "^18.0.6",
+    "@types/react-window": "^1.8.5",
     "@typescript-eslint/eslint-plugin": "^5.36.1",
     "eslint": "^8.23.0",
     "eslint-config-standard-with-typescript": "^22.0.0",
