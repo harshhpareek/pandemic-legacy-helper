@@ -13,13 +13,16 @@
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "latest",
     "react-scripts": "latest",
-    "react-window": "latest"
+    "react-window": "latest",
+    "serve": "^14.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "dev": "react-scripts start",
+    "start": "serve -s build",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject",
+    "heroku-postbuild": "npm run build"
   },
   "browserslist": {
     "production": [
