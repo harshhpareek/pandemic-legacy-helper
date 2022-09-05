@@ -88,43 +88,43 @@ function BackgroundLetterAvatars (props: TAvatarProps): JSX.Element {
   }
   return (
     <Box>
-    <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="avatars" direction="horizontal">
-        {(provided, snapshot) => (
-          <div
-            ref={provided.innerRef}
-            {...provided.droppableProps}
-          >
-            <Stack direction="row" spacing={2}>
-              {props.positionToPlayerId.map((playerId, position) => {
-                const [showNameDialog, setShowNameDialog] = React.useState(false)
-                console.log(props.positionToPlayerId)
-                return (
-                  <Draggable key={playerId} draggableId={String(playerId)} index={position}>
-                    {(provided, snapshot) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                      >
-                        <NameDialog
-                          show={showNameDialog}
-                          value={props.players[playerId]}
-                          onClose={() => { setShowNameDialog(false) }}
-                          onChange={(name) => {
-                            props.setState((current: TState) =>
-                              ({ ...current, players: props.players.map((oldName, j) => (j === playerId ? name : oldName)) }))
-                          }} />
-                        <Avatar component={Paper} elevation={5} {...stringAvatar(props.players[playerId])} onClick={() => { setShowNameDialog(true) }} />
-                      </div>)}
-                  </Draggable>)
-              })}
-            </Stack>
-            {provided.placeholder}
-          </div>
-        )}
-      </Droppable>
-    </DragDropContext>
+      <DragDropContext onDragEnd={onDragEnd}>
+        <Droppable droppableId="avatars" direction="horizontal">
+          {(provided, snapshot) => (
+            <div
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+            >
+              <Stack direction="row" spacing={2}>
+                {props.positionToPlayerId.map((playerId, position) => {
+                  const [showNameDialog, setShowNameDialog] = React.useState(false)
+                  console.log(props.positionToPlayerId)
+                  return (
+                    <Draggable key={playerId} draggableId={String(playerId)} index={position}>
+                      {(provided, snapshot) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <NameDialog
+                            show={showNameDialog}
+                            value={props.players[playerId]}
+                            onClose={() => { setShowNameDialog(false) }}
+                            onChange={(name) => {
+                              props.setState((current: TState) =>
+                                ({ ...current, players: props.players.map((oldName, j) => (j === playerId ? name : oldName)) }))
+                            }} />
+                          <Avatar component={Paper} elevation={5} {...stringAvatar(props.players[playerId])} onClick={() => { setShowNameDialog(true) }} />
+                        </div>)}
+                    </Draggable>)
+                })}
+              </Stack>
+              {provided.placeholder}
+            </div>
+          )}
+        </Droppable>
+      </DragDropContext>
     </Box>
   )
 }
@@ -154,7 +154,7 @@ function renderHistory (props: ListChildComponentProps): JSX.Element {
     <ListItem style={style} key={index} component="div" disablePadding>
       <ListItem>
         <Avatar {...stringAvatar('Harsh Pareek')} />
-        <ListItemText primary="drew" sx={{ color: 'blue' }} inset/>
+        <ListItemText primary="drew" sx={{ color: 'blue' }} inset />
         <ListItemButton dense sx={{ width: '2%' }}>
           <ListItemIcon>{playerCardIcon(data[index].playerCards[0])} </ListItemIcon>
         </ListItemButton>
@@ -173,83 +173,89 @@ function renderHistory (props: ListChildComponentProps): JSX.Element {
   )
 }
 
-export default function App (): globalThis.JSX.Element {
-  const [state, setState] = React.useState<TState>({
+export default class App extends React.Component<{}, TState> {
+  state: TState = {
     // Game Setup settings
     players: ['HP', 'CJ', 'MT', 'SK'],
     fundingLevel: 4,
     positionToPlayerId: [0, 1, 2, 3],
 
     // Game state
-    history: [{ player_id: 0, playerCards: ['Red', 'Blue'], infectionCards: ['Atlanta', 'Chicago'] }, { player_id: 1, playerCards: ['Yellow', 'Epidemic'], infectionCards: ['Algiers', 'Osaka'] }]
-  })
-  return (
-    <Container>
-      <Box>
-        <Typography variant="h3" component="h3" gutterBottom>
-          Game Setup
-        </Typography>
-        Follow the <Link href="https://www.boardgamebarrister.com/unboxing-pandemic-legacy/" target="_blank" rel="noopener">Legacy Season 1 setup guide </Link>:
-        <Typography variant="h5" component="h1" gutterBottom>
-          Steps 1-4: Infect 9 cities
-        </Typography>
-        Enter the cities here:
-        <Typography variant="h5" component="h1" gutterBottom>
-          Steps 5-6: Add funded events to player deck and deal cards
-        </Typography>
-        <TextField
-          label="Funding Level"
-          variant="filled"
-          type="number"
-          InputLabelProps={{
-            shrink: true
-          }}
-          value={state.fundingLevel}
-          onChange={(event) =>
-            setState((current: TState) => ({ ...current, fundingLevel: Number(event.target.value) }))
-          }
-        />
-        Give two cards to each player. This page assumes 4 players. You
-              should now have <b>40 cards</b>. Add funded events. Split into 5
-              piles and add <span style={{ color: 'red' }}>Epidemic</span>{' '}
-              cards.
-        Cards dealt:
-        The position by which epidemics MUST occur are:
-        <Typography variant="h5" component="h1" gutterBottom>
-          Step 7-10: Player names, order and colors
-        </Typography>
-        Click to update player initials below and select pawn colors. Drag to reorder players.
-        <BackgroundLetterAvatars players={state.players} positionToPlayerId={state.positionToPlayerId} setState={setState} />
+    history: [
+      { player_id: 0, playerCards: ['Red', 'Blue'], infectionCards: ['Atlanta', 'Chicago'] },
+      { player_id: 1, playerCards: ['Yellow', 'Epidemic'], infectionCards: ['Algiers', 'Osaka'] }
+    ]
+  }
 
-        <h3> Game Log </h3>
+  render (): JSX.Element {
+    return (
+      <Container>
+        <Box>
+          <Typography variant="h3" component="h3" gutterBottom>
+            Game Setup
+          </Typography>
+          Follow the <Link href="https://www.boardgamebarrister.com/unboxing-pandemic-legacy/" target="_blank" rel="noopener">Legacy Season 1 setup guide </Link>:
+          <Typography variant="h5" component="h1" gutterBottom>
+            Steps 1-4: Infect 9 cities
+          </Typography>
+          Enter the cities here:
+          <Typography variant="h5" component="h1" gutterBottom>
+            Steps 5-6: Add funded events to player deck and deal cards
+          </Typography>
+          <TextField
+            label="Funding Level"
+            variant="filled"
+            type="number"
+            InputLabelProps={{
+              shrink: true
+            }}
+            value={this.state.fundingLevel}
+            onChange={(event) =>
+              this.setState((current: TState) => ({ ...current, fundingLevel: Number(event.target.value) }))
+            }
+          />
+          Give two cards to each player. This page assumes 4 players. You
+          should now have <b>40 cards</b>. Add funded events. Split into 5
+          piles and add <span style={{ color: 'red' }}>Epidemic</span>{' '}
+          cards.
+          Cards dealt:
+          The position by which epidemics MUST occur are:
+          <Typography variant="h5" component="h1" gutterBottom>
+            Step 7-10: Player names, order and colors
+          </Typography>
+          Click to update player initials below and select pawn colors. Drag to reorder players.
+          <BackgroundLetterAvatars players={this.state.players} positionToPlayerId={this.state.positionToPlayerId} setState={this.setState} />
 
-        <Paper sx={{ width: '100%', height: 400, maxWidth: 900, bgcolor: 'background.paper' }} elevation={3}>
-          <FixedSizeList
-            height={400}
-            width={600}
-            itemSize={46}
-            itemCount={state.history.length}
-            overscanCount={10}
-            itemData={state.history}
-          >
-            {renderHistory}
-          </FixedSizeList>
-        </Paper>
-        <p />Glossary
-        <ul>
-          <li>
-            <IndeterminateCheckBoxOutlinedIcon />: Not entered yet
-          </li>
-          <li>{playerCardIcon('Epidemic')}: Epidemic</li>
-          <li>{playerCardIcon('Black')}: Black city player card</li>
-          <li>{playerCardIcon('Yellow')}: Yellow city player card</li>
-          <li>{playerCardIcon('Blue')}: Blue city player card</li>
-          <li>{playerCardIcon('Red')}: Red city player card</li>
-          <li>{playerCardIcon('Funded')}: Funded event</li>
-        </ul>
-        <h3>(Debug) State</h3>
-        <pre>{JSON.stringify(state, null, 2)}</pre>
-      </Box >
-    </Container >
-  )
+          <h3> Game Log </h3>
+
+          <Paper sx={{ width: '100%', height: 400, maxWidth: 900, bgcolor: 'background.paper' }} elevation={3}>
+            <FixedSizeList
+              height={400}
+              width={600}
+              itemSize={46}
+              itemCount={this.state.history.length}
+              overscanCount={10}
+              itemData={this.state.history}
+            >
+              {renderHistory}
+            </FixedSizeList>
+          </Paper>
+          <p />Glossary
+          <ul>
+            <li>
+              <IndeterminateCheckBoxOutlinedIcon />: Not entered yet
+            </li>
+            <li>{playerCardIcon('Epidemic')}: Epidemic</li>
+            <li>{playerCardIcon('Black')}: Black city player card</li>
+            <li>{playerCardIcon('Yellow')}: Yellow city player card</li>
+            <li>{playerCardIcon('Blue')}: Blue city player card</li>
+            <li>{playerCardIcon('Red')}: Red city player card</li>
+            <li>{playerCardIcon('Funded')}: Funded event</li>
+          </ul>
+          <h3>(Debug) State</h3>
+          <pre>{JSON.stringify(this.state, null, 2)}</pre>
+        </Box >
+      </Container >
+    )
+  }
 }
