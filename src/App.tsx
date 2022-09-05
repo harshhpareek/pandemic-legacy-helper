@@ -84,14 +84,20 @@ function renderRow (props: ListChildComponentProps): JSX.Element {
     <ListItem style={style} key={index} component="div" disablePadding>
       <ListItem>
         <Avatar {...stringAvatar('Harsh Pareek')} />
-        <ListItemText primary="drew" inset />
-        <ListItemButton dense disableGutters>
+        <ListItemText primary="drew"/>
+        <ListItemButton dense sx={{ width: '2%' }}>
           <ListItemIcon>{playerCardIcon('Red')} </ListItemIcon>
         </ListItemButton>
-        <ListItemButton>
+        <ListItemButton dense sx={{ width: '2%' }}>
           <ListItemIcon>{playerCardIcon('Epidemic')} </ListItemIcon>
         </ListItemButton>
-        <ListItemText primary="infected" inset />
+        <ListItemText primary="infected"/>
+        <ListItemButton>
+          <ListItemText primary="Kinshasa"/>
+        </ListItemButton>
+        <ListItemButton>
+          <ListItemText primary="Essen"/>
+        </ListItemButton>
       </ListItem>
     </ListItem>
   )
@@ -108,7 +114,7 @@ export default function App (): globalThis.JSX.Element {
     fundingLevel: 4,
 
     // Game state
-    history: [[['Red', 'Blue'], []]]
+    history: [[['Red', 'Blue'], ['Atlanta', 'Chicago']]]
   })
   return (
     <Container maxWidth="sm">
@@ -171,10 +177,10 @@ export default function App (): globalThis.JSX.Element {
           <li>{playerCardIcon('Funded')}: Funded event</li>
         </ul>
 
-        <Paper sx={{ width: '100%', height: 400, maxWidth: 360, bgcolor: 'background.paper' }} elevation={3}>
+        <Paper sx={{ width: '100%', height: 400, maxWidth: 600, bgcolor: 'background.paper' }} elevation={3}>
           <FixedSizeList
             height={400}
-            width={360}
+            width={600}
             itemSize={46}
             itemCount={200}
             overscanCount={1}
