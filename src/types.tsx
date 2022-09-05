@@ -1,10 +1,8 @@
 export interface TState {
   // Game Setup settings
-  player0Name: string
-  player1Name: string
-  player2Name: string
-  player3Name: string
+  players: string[]
   fundingLevel: number
+  positionToPlayerId: number[]
   // Game State
   history: TPlayerMove[]
 }
@@ -19,4 +17,4 @@ export type TYellowInfectionCard = 'Bogota' | 'Buenos Aries' | 'Johannesburg' | 
 export type TRedInfectionCard = 'Bangkok' | 'Beijing' | 'Ho Chi Minh City' | 'Hong Kong' | 'Jakarta' | 'Manila' | 'Osaka' | 'Seoul' | 'Shanghai' | 'Sydney' | 'Taipei' | 'Tokyo'
 export type TInfectionCard = TBlueInfectionCard | TBlackInfectionCard | TYellowInfectionCard | TRedInfectionCard
 
-export type TPlayerMove = [playerCards: [TPlayerCard, TPlayerCard], infectionCards: TInfectionCard[]]
+export interface TPlayerMove {player_id: number, playerCards: [TPlayerCard, TPlayerCard], infectionCards: TInfectionCard[]}

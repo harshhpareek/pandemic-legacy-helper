@@ -5,19 +5,23 @@ import CurrencyBitcoinIcon from '@mui/icons-material/CurrencyBitcoin'
 import IndeterminateCheckBoxOutlinedIcon from '@mui/icons-material/IndeterminateCheckBoxOutlined'
 import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import Container from '@mui/material/Container'
 import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
 import Paper from '@mui/material/Paper'
-import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import * as React from 'react'
-import { FixedSizeList, ListChildComponentProps } from 'react-window'
-import SettingsModal from './components/SettingsModal'
-import { TPlayerCard, TState } from './types'
+import { ListChildComponentProps, FixedSizeList } from 'react-window'
+import {
+  DragDropContext,
+  Droppable, DropResult, Draggable
+} from 'react-beautiful-dnd'
+import { TState, TPlayerCard } from './types'
+import Stack from '@mui/material/Stack'
+import NameDialog from './components/NameDialog'
 
 function stringToColor (string: string): string {
   let hash = 0
@@ -42,19 +46,83 @@ function stringToColor (string: string): string {
 function stringAvatar (name: string): { sx: { bgcolor: string }, children: string } {
   return {
     sx: {
-      bgcolor: stringToColor(name)
+      bgcolor: stringToColor(name + '__slt__')
     },
-    children: `${name.split(' ')[0][0]}${name.split(' ')[1][0]}`
+    children: name.length === 2 ? name : (name.includes(' ') ? `${name.split(' ')[0][0]}${name.split(' ')[1][0]}` : name[0])
   }
 }
 
-function BackgroundLetterAvatars (): JSX.Element {
+interface TAvatarProps {
+  players: string[]
+  positionToPlayerId: number[]
+  setState: React.Dispatch<React.SetStateAction<TState>>
+}
+
+function BackgroundLetterAvatars (props: TAvatarProps): JSX.Element {
+  function onDragEnd ({ destination, source }: DropResult): void { // dropped outside the list
+    if (destination === undefined || destination === null) { return }
+    const oldPositionToPlayerId = props.positionToPlayerId
+    const newPositionToPlayerId = oldPositionToPlayerId.map((playerId, position) => {
+      if (position === destination.index) {
+        return oldPositionToPlayerId[source.index]
+      }
+      if ((position < source.index && position < destination.index) || (position > source.index && position > destination.index)) {
+        return playerId
+      } else if (position <= source.index && position > destination.index) {
+        // No Array OOB because position cannot be 0 if it is strictly greater than destination.index (>= 0)
+        return oldPositionToPlayerId[position - 1]
+      } else if (position >= source.index && position < destination.index) {
+        // No Array OOB because position cannot be the last element if it is strictly less than destination.index (<= length-1)
+        return oldPositionToPlayerId[position + 1]
+      }
+      // Should never happen. This will crash the program
+      return -1
+    })
+    console.log(props.positionToPlayerId)
+    console.log(newPositionToPlayerId)
+    props.setState((current: TState) => ({
+      ...current,
+      positionToPlayerId: newPositionToPlayerId
+    }))
+  }
   return (
-    <Stack direction="row" spacing={2}>
-      <Avatar {...stringAvatar('Kent Dodds')} />
-      <Avatar {...stringAvatar('Jed Watson')} />
-      <Avatar {...stringAvatar('Tim Neutkens')} />
-    </Stack>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <Droppable droppableId="avatars" direction="horizontal">
+        {(provided, snapshot) => (
+          <div
+            ref={provided.innerRef}
+            {...provided.droppableProps}
+          >
+            <Stack direction="row" spacing={2}>
+              {props.positionToPlayerId.map((playerId, position) => {
+                const [showNameDialog, setShowNameDialog] = React.useState(false)
+                console.log(props.positionToPlayerId)
+                return (
+                  <Draggable key={playerId} draggableId={String(playerId)} index={position}>
+                    {(provided, snapshot) => (
+                      <div
+                        ref={provided.innerRef}
+                        {...provided.draggableProps}
+                        {...provided.dragHandleProps}
+                      >
+                        <NameDialog
+                          show={showNameDialog}
+                          value={props.players[playerId]}
+                          onClose={() => { setShowNameDialog(false) }}
+                          onChange={(name) => {
+                            props.setState((current: TState) =>
+                              ({ ...current, players: props.players.map((oldName, j) => (j === playerId ? name : oldName)) }))
+                          }} />
+                        <Avatar component={Paper} elevation={5} {...stringAvatar(props.players[playerId])} onClick={() => { setShowNameDialog(true) }} />
+                      </div>)}
+                  </Draggable>)
+              })}
+            </Stack>
+            {provided.placeholder}
+          </div>
+        )}
+      </Droppable>
+    </DragDropContext>
   )
 }
 
@@ -77,26 +145,25 @@ function playerCardIcon (card: TPlayerCard): globalThis.JSX.Element {
   }
 }
 
-function renderRow (props: ListChildComponentProps): JSX.Element {
-  const { index, style } = props
-
+function renderHistory (props: ListChildComponentProps): JSX.Element {
+  const { data, index, style } = props
   return (
     <ListItem style={style} key={index} component="div" disablePadding>
       <ListItem>
         <Avatar {...stringAvatar('Harsh Pareek')} />
-        <ListItemText primary="drew"/>
+        <ListItemText primary="drew" />
         <ListItemButton dense sx={{ width: '2%' }}>
-          <ListItemIcon>{playerCardIcon('Red')} </ListItemIcon>
+          <ListItemIcon>{playerCardIcon(data[index].playerCards[0])} </ListItemIcon>
         </ListItemButton>
         <ListItemButton dense sx={{ width: '2%' }}>
-          <ListItemIcon>{playerCardIcon('Epidemic')} </ListItemIcon>
+          <ListItemIcon>{playerCardIcon(data[index].playerCards[1])} </ListItemIcon>
         </ListItemButton>
-        <ListItemText primary="infected"/>
+        <ListItemText primary="infected" />
         <ListItemButton>
-          <ListItemText primary="Kinshasa"/>
+          <ListItemText primary="Kinshasa" />
         </ListItemButton>
         <ListItemButton>
-          <ListItemText primary="Essen"/>
+          <ListItemText primary="Essen" />
         </ListItemButton>
       </ListItem>
     </ListItem>
@@ -104,41 +171,37 @@ function renderRow (props: ListChildComponentProps): JSX.Element {
 }
 
 export default function App (): globalThis.JSX.Element {
-  const [showSettings, setShowSettings] = React.useState(false)
   const [state, setState] = React.useState<TState>({
     // Game Setup settings
-    player0Name: 'P0',
-    player1Name: 'P1',
-    player2Name: 'P2',
-    player3Name: 'P3',
+    players: ['HP', 'CJ', 'MT', 'SK'],
     fundingLevel: 4,
+    positionToPlayerId: [0, 1, 2, 3],
 
     // Game state
-    history: [[['Red', 'Blue'], ['Atlanta', 'Chicago']]]
+    history: [{ player_id: 0, playerCards: ['Red', 'Blue'], infectionCards: ['Atlanta', 'Chicago'] }, { player_id: 1, playerCards: ['Yellow', 'Epidemic'], infectionCards: ['Algiers', 'Osaka'] }]
   })
   return (
     <Container maxWidth="sm">
       <Box sx={{ my: 4 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Pandemic Helper
+          Pandemic Card Counter
         </Typography>
-        <Button variant="contained"
-          onClick={() => setShowSettings(true)}
-        >
-          Settings
-        </Button>
-        {showSettings && <SettingsModal
-          onClose={() => {
-            setShowSettings(false)
+        <TextField
+          label="Funding Level"
+          variant="filled"
+          type="number"
+          InputLabelProps={{
+            shrink: true
           }}
-          show={showSettings}
-          parentState={state}
-          setParentState={setState}
-        />}
-        <Typography variant="h4" component="h1" gutterBottom>
-          Setup instructions
+          value={state.fundingLevel}
+          onChange={(event) =>
+            setState((current: TState) => ({ ...current, fundingLevel: Number(event.target.value) }))
+          }
+        />
+        <Typography variant="h5" component="h1" gutterBottom>
+          Player Order
         </Typography>
-        <BackgroundLetterAvatars />
+        <BackgroundLetterAvatars players={state.players} positionToPlayerId={state.positionToPlayerId} setState={setState} />
         <div>
           <p>
             Enter <u>player names</u> or initials in Settings, and enter the{' '}
@@ -163,7 +226,20 @@ export default function App (): globalThis.JSX.Element {
             </li>
           </ul>
         </div>
-        <h3>Enter Rounds </h3>
+        <h3> Game Log </h3>
+
+        <Paper sx={{ width: '100%', height: 400, maxWidth: 600, bgcolor: 'background.paper' }} elevation={3}>
+          <FixedSizeList
+            height={400}
+            width={600}
+            itemSize={46}
+            itemCount={state.history.length}
+            overscanCount={10}
+            itemData={state.history}
+          >
+            {renderHistory}
+          </FixedSizeList>
+        </Paper>
         <p />Glossary
         <ul>
           <li>
@@ -176,18 +252,6 @@ export default function App (): globalThis.JSX.Element {
           <li>{playerCardIcon('Red')}: Red city player card</li>
           <li>{playerCardIcon('Funded')}: Funded event</li>
         </ul>
-
-        <Paper sx={{ width: '100%', height: 400, maxWidth: 600, bgcolor: 'background.paper' }} elevation={3}>
-          <FixedSizeList
-            height={400}
-            width={600}
-            itemSize={46}
-            itemCount={200}
-            overscanCount={1}
-          >
-            {renderRow}
-          </FixedSizeList>
-        </Paper>
         <h3>(Debug) State</h3>
         <pre>{JSON.stringify(state, null, 2)}</pre>
       </Box >
