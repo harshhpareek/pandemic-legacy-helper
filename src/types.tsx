@@ -14,6 +14,8 @@ export interface TState {
   playerColors: TPawnColor[]
   fundingLevel: number
   positionToPlayerId: number[]
+  initialPlayerCards: Array<[TPlayerCard, TPlayerCard]>
+  initialInfections: TInfectionCard[]
   // Game State
   history: TPlayerMove[]
 }
@@ -34,7 +36,8 @@ export function pawnColor (color: TPawnColor): string {
 }
 
 // For the player deck, we will not track individual player cards, just the colour
-export type TPlayerCard = '_' | 'Epidemic' | 'Black' | 'Yellow' | 'Blue' | 'Red' | 'Funded'
+const PlayerCardTypes = ['_', 'Epidemic', 'Black', 'Yellow', 'Blue', 'Red', 'Funded']
+export type TPlayerCard = typeof PlayerCardTypes[number]
 
 // For the Infection Deck, we will track each card
 const BlueCities = ['Atlanta', 'Chicago', 'Essen', 'London', 'Madrid', 'Milan', 'Montreal', 'New York', 'Paris', 'San Francisco', 'St. Petersburg', 'Washington'] as const
@@ -46,7 +49,7 @@ export type TBlueInfectionCard = typeof BlueCities[number]
 export type TBlackInfectionCard = typeof BlackCities[number]
 export type TYellowInfectionCard = typeof YellowCities[number]
 export type TRedInfectionCard = typeof RedCities[number]
-export type TInfectionCard = TBlueInfectionCard | TBlackInfectionCard | TYellowInfectionCard | TRedInfectionCard
+export type TInfectionCard = '_' | TBlueInfectionCard | TBlackInfectionCard | TYellowInfectionCard | TRedInfectionCard
 
 export function infectionCardColor (card: TInfectionCard): string {
   if (BlueCities.find((city) => card === city) !== undefined) {
@@ -67,7 +70,7 @@ export function infectionCardColor (card: TInfectionCard): string {
 
 export interface TPlayerMove { player_id: number, playerCards: [TPlayerCard, TPlayerCard], infectionCards: TInfectionCard[] }
 
-export function playerCardIcon (card: TPlayerCard): globalThis.JSX.Element {
+export function playerCardIcon (card: TPlayerCard): JSX.Element {
   switch (card) {
     case '_':
       return <IndeterminateCheckBoxOutlinedIcon />
@@ -84,4 +87,6 @@ export function playerCardIcon (card: TPlayerCard): globalThis.JSX.Element {
     case 'Funded':
       return <CurrencyBitcoinIcon color="success" />
   }
+  // Should never happen
+  return <IndeterminateCheckBoxOutlinedIcon />
 }

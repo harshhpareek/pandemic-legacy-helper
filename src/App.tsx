@@ -8,6 +8,10 @@ import { playerCardIcon, TState } from './types'
 import Link from '@mui/material/Link'
 import DraggableAvatarStack from './components/DraggableAvatarStack'
 import GameLog from './components/GameLog'
+import InitialPlayerCardsLog from './components/InitialPlayerCards'
+import InitialInfectionsLog from './components/InitialInfections'
+import Paper from '@mui/material/Paper'
+import { List } from '@mui/material'
 
 export default class App extends React.Component<{}, TState> {
   state: TState = {
@@ -16,6 +20,8 @@ export default class App extends React.Component<{}, TState> {
     playerColors: ['Blue', 'Black', 'White', 'Pink'],
     fundingLevel: 4,
     positionToPlayerId: [0, 1, 2, 3],
+    initialPlayerCards: [],
+    initialInfections: [],
 
     // Game state
     history: [
@@ -42,6 +48,21 @@ export default class App extends React.Component<{}, TState> {
             Steps 1-4: Infect 9 cities
           </Typography>
           Enter the cities here:
+          <Paper sx={{ width: '100%', height: 400, maxWidth: 900, bgcolor: 'background.paper' }} elevation={3}>
+            <List
+              sx={{
+                width: '100%',
+                maxWidth: 360,
+                bgcolor: 'background.paper',
+                position: 'relative',
+                overflow: 'auto',
+                maxHeight: 300,
+                '& ul': { padding: 0 }
+              }}
+            >
+              <InitialInfectionsLog parentState={this.state} setParentState={this.setState}></InitialInfectionsLog>
+            </List>
+          </Paper>
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
             Steps 5-6: Add funded events to player deck and deal cards
@@ -65,6 +86,21 @@ export default class App extends React.Component<{}, TState> {
           cards.
           <p></p>
           Cards dealt:
+          <Paper sx={{ width: '100%', height: 400, maxWidth: 900, bgcolor: 'background.paper' }} elevation={3}>
+            <List
+              sx={{
+                width: '100%',
+                maxWidth: 360,
+                bgcolor: 'background.paper',
+                position: 'relative',
+                overflow: 'auto',
+                maxHeight: 300,
+                '& ul': { padding: 0 }
+              }}
+            >
+              <InitialPlayerCardsLog parentState={this.state} setParentState={this.setState}></InitialPlayerCardsLog>
+            </List>
+          </Paper>
           <p></p>
           The position by which epidemics MUST occur are:
 
@@ -76,7 +112,21 @@ export default class App extends React.Component<{}, TState> {
           <DraggableAvatarStack players={this.state.players} playerColors={this.state.playerColors} positionToPlayerId={this.state.positionToPlayerId} setState={this.setState} />
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>Game Log</Typography>
-          <GameLog history={this.state.history} />
+          <Paper sx={{ width: '100%', height: 400, maxWidth: 900, bgcolor: 'background.paper' }} elevation={3}>
+            <List
+              sx={{
+                width: '100%',
+                maxWidth: 360,
+                bgcolor: 'background.paper',
+                position: 'relative',
+                overflow: 'auto',
+                maxHeight: 300,
+                '& ul': { padding: 0 }
+              }}
+            >
+              <GameLog parentState={this.state} setParentState={this.setState} />
+            </List>
+          </Paper>
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Glossary </Typography>
           <ul>
