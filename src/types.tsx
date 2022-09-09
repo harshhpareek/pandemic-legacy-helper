@@ -36,7 +36,7 @@ export function pawnColor (color: TPawnColor): string {
 }
 
 // For the player deck, we will not track individual player cards, just the colour
-const PlayerCardTypes = ['_', 'Epidemic', 'Black', 'Yellow', 'Blue', 'Red', 'Funded']
+export const PlayerCardTypes = ['_', 'Epidemic', 'Black', 'Yellow', 'Blue', 'Red', 'Funded']
 export type TPlayerCard = typeof PlayerCardTypes[number]
 
 // For the Infection Deck, we will track each card
@@ -54,7 +54,6 @@ export type TInfectionCard = typeof AllCities[number]
 
 export function infectionCardColor (card: TInfectionCard): string {
   if (BlueCities.find((city) => card === city) !== undefined) {
-    console.log('blue')
     return 'blue'
   }
   if (BlackCities.find((city) => card === city) !== undefined) {
@@ -79,7 +78,7 @@ export function playerCardIcon (card: TPlayerCard): JSX.Element {
     case 'Epidemic':
       return <Icon path={mdiBiohazard} color="red" size="25" />
     case 'Black':
-      return <CoronavirusOutlinedIcon sx={{ color: 'brown' }} />
+      return <CoronavirusOutlinedIcon sx={{ color: 'black' }} />
     case 'Yellow':
       return <CoronavirusOutlinedIcon sx={{ color: 'orange' }} />
     case 'Blue':
