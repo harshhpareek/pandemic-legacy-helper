@@ -8,6 +8,7 @@ import {
 import { pawnColor, TPawnColor, TState } from '../types'
 import Stack from '@mui/material/Stack'
 import NameDialog from './NameDialog'
+import { genHistoryRows } from '../utils'
 
 export function stringAvatar (name: string, color: TPawnColor): { sx: { bgcolor: string }, children: string } {
   return {
@@ -19,10 +20,8 @@ export function stringAvatar (name: string, color: TPawnColor): { sx: { bgcolor:
 }
 
 interface TAvatarProps {
-  players: string[]
-  playerColors: TPawnColor[]
-  positionToPlayerId: number[]
-  setState: React.Dispatch<React.SetStateAction<TState>>
+  parentState: TState
+  setParentState: React.Dispatch<React.SetStateAction<TState>>
 }
 
 export default class DraggableAvatarStack extends React.Component<TAvatarProps, {}> {
@@ -33,7 +32,7 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
 
   onDragEnd ({ destination, source }: DropResult): void { // dropped outside the list
     if (destination === undefined || destination === null) { return }
-    const oldPositionToPlayerId = this.props.positionToPlayerId
+    const oldPositionToPlayerId = this.props.parentState.positionToPlayerId
     const newPositionToPlayerId = oldPositionToPlayerId.map((playerId, position) => {
       if (position === destination.index) {
         return oldPositionToPlayerId[source.index]
@@ -50,13 +49,17 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
       // Should never happen. This will crash the program
       return -1
     })
-    this.props.setState((current: TState) => ({
+    this.props.setParentState((current: TState) => ({
       ...current,
-      positionToPlayerId: newPositionToPlayerId
+      positionToPlayerId: newPositionToPlayerId,
+      history: genHistoryRows(this.props.parentState.fundingLevel, newPositionToPlayerId)
     }))
   }
 
   render (): React.ReactNode {
+    const players = this.props.parentState.players
+    const playerColors = this.props.parentState.playerColors
+    const positionToPlayerId = this.props.parentState.positionToPlayerId
     return (
       <DragDropContext onDragEnd={this.onDragEnd}>
         <Droppable droppableId="avatars" direction="horizontal">
@@ -66,7 +69,7 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
               {...provided.droppableProps}
             >
               <Stack direction="row" spacing={2}>
-                {this.props.positionToPlayerId.map((playerId, position) => {
+                {positionToPlayerId.map((playerId, position) => {
                   const [showNameDialog, setShowNameDialog] = React.useState(false)
                   return (
                     <Draggable key={playerId} draggableId={String(playerId)} index={position}>
@@ -78,18 +81,18 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
                         >
                           <NameDialog
                             show={showNameDialog}
-                            name={this.props.players[playerId]}
-                            color={this.props.playerColors[playerId]}
+                            name={players[playerId]}
+                            color={playerColors[playerId]}
                             onClose={() => { setShowNameDialog(false) }}
                             onChangeName={(name: string) => {
-                              this.props.setState((current: TState) =>
-                                ({ ...current, players: this.props.players.map((oldName, j) => (j === playerId ? name : oldName)) }))
+                              this.props.setParentState((current: TState) =>
+                                ({ ...current, players: players.map((oldName, j) => (j === playerId ? name : oldName)) }))
                             }}
                             onChangeColor={(color: TPawnColor) => {
-                              this.props.setState((current: TState) =>
-                                ({ ...current, playerColors: this.props.playerColors.map((oldColor, j) => (j === playerId ? color : oldColor)) }))
+                              this.props.setParentState((current: TState) =>
+                                ({ ...current, playerColors: playerColors.map((oldColor, j) => (j === playerId ? color : oldColor)) }))
                             }} />
-                          <Avatar component={Paper} elevation={5} {...stringAvatar(this.props.players[playerId], this.props.playerColors[playerId])} onClick={() => { setShowNameDialog(true) }} />
+                          <Avatar component={Paper} elevation={5} {...stringAvatar(players[playerId], playerColors[playerId])} onClick={() => { setShowNameDialog(true) }} />
                         </div>)}
                     </Draggable>)
                 })}

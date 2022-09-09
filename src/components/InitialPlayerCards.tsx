@@ -13,8 +13,10 @@ export default class InitialPlayerCardsLog extends React.Component<InitialPlayer
     const players = this.props.parentState.players
     const playerColors = this.props.parentState.playerColors
     const initialPlayerCards = this.props.parentState.initialPlayerCards
-    return (<>{players.map((player, playerId) => {
-      return (<ListItem key={playerId}>
+    const positionToPlayerId = this.props.parentState.positionToPlayerId
+    return (<>{positionToPlayerId.map((playerId, position) => {
+      const player = players[playerId]
+      return (<ListItem key={position}>
         <ListItemAvatar>
           <Avatar {...stringAvatar(player, playerColors[playerId])} />
         </ListItemAvatar>

@@ -1,4 +1,4 @@
-import { ListItem, ListItemText, Avatar, ListItemAvatar, FormControl, MenuItem, Select } from '@mui/material'
+import { ListItem, ListItemText, Avatar, ListItemAvatar, FormControl, MenuItem, Select, ListSubheader } from '@mui/material'
 import * as React from 'react'
 import { AllCities, infectionCardColor, playerCardIcon, PlayerCardTypes, TState } from '../types'
 import { stringAvatar } from './DraggableAvatarStack'
@@ -16,14 +16,17 @@ export default class GameLog extends React.Component<GameLogProps, {}> {
     const playerColors = this.props.parentState.playerColors
     const history = this.props.parentState.history
     return (<>
+            <ListSubheader>Initial Infections</ListSubheader>
             <InitialInfectionsLog parentState={this.props.parentState} setParentState={this.props.setParentState}></InitialInfectionsLog>
+            <ListSubheader>Initial Player Cards</ListSubheader>
             <InitialPlayerCardsLog parentState={this.props.parentState} setParentState={this.props.setParentState}></InitialPlayerCardsLog>
-            {history.map((row, turnIdx) => {
+            {history.map((row, histIdx) => {
               return (
-                    <React.Fragment key={turnIdx}>
+                    <React.Fragment key={histIdx}>
+                        {(histIdx % 4 === 0) && (<ListSubheader>Round {histIdx / 4 + 1}</ListSubheader>)}
                         <ListItem>
                             <ListItemAvatar>
-                                <Avatar {...stringAvatar(players[row.player_id], playerColors[row.player_id])} />
+                                <Avatar {...stringAvatar(players[row.playerId], playerColors[row.playerId])} />
                             </ListItemAvatar>
                             <ListItemText primary="drew" sx={{ color: 'blue' }} />
                             {row.playerCards.map((handCard, handCardIdx) => {
@@ -40,16 +43,21 @@ export default class GameLog extends React.Component<GameLogProps, {}> {
                                     ><Select
                                         value={handCard}
                                         onChange={(event) => {
-                                          console.log(event)
                                           this.props.setParentState(
                                             (current: TState) =>
                                               ({
-                                                ...current
-                                                //   initialPlayerCards:
-                                                //   initialPlayerCards.map((hand, k) =>
-                                                //     (k === playerId
-                                                //       ? (handCardIdx === 0 ? [event.target.value, hand[1]] : [hand[0], event.target.value])
-                                                //       : hand))
+                                                ...current,
+                                                history:
+                                                        history.map((oldRow, k) => {
+                                                          if (k !== histIdx) {
+                                                            return oldRow
+                                                          } else {
+                                                            const newRow = { ...oldRow }
+                                                            newRow.playerCards = oldRow.playerCards.map((oldCard, m) => (m === handCardIdx ? event.target.value : oldCard))
+                                                            return newRow
+                                                          }
+                                                        }
+                                                        )
                                               }))
                                         }}
                                         IconComponent={() => null}
@@ -80,13 +88,23 @@ export default class GameLog extends React.Component<GameLogProps, {}> {
                                         <Select
                                             value={card}
                                             sx={{ color: infectionCardColor(card) }}
+                                            IconComponent={() => null}
                                             onChange={(event) => {
                                               this.props.setParentState(
                                                 (current: TState) =>
                                                   ({
-                                                    ...current
-                                                    // initialInfections:
-                                                    // infections.map((inf, k) => (k === i ? event.target.value : inf))
+                                                    ...current,
+                                                    history:
+                                                    history.map((oldRow, k) => {
+                                                      if (k !== histIdx) {
+                                                        return oldRow
+                                                      } else {
+                                                        const newRow = { ...oldRow }
+                                                        newRow.infectionCards = oldRow.infectionCards.map((oldCard, m) => (m === j ? event.target.value : oldCard))
+                                                        return newRow
+                                                      }
+                                                    }
+                                                    )
                                                   }))
                                             }}
                                         >

@@ -14,10 +14,20 @@ export interface TState {
   playerColors: TPawnColor[]
   fundingLevel: number
   positionToPlayerId: number[]
-  initialPlayerCards: Array<[TPlayerCard, TPlayerCard]>
+  initialPlayerCards: TPlayerCard[][]
   initialInfections: TInfectionCard[]
   // Game State
   history: TPlayerMove[]
+}
+
+export interface TPlayerMove {
+  playerId: number
+  playerCards: TPlayerCard[]
+  infectionCards: TInfectionCard[]
+}
+
+export function newHistoryRow (playerId: number): TPlayerMove {
+  return { playerId, playerCards: ['_', '_'], infectionCards: ['_', '_'] }
 }
 
 export type TPawnColor = 'Blue' | 'Pink' | 'White' | 'Black'
@@ -68,8 +78,6 @@ export function infectionCardColor (card: TInfectionCard): string {
   // This should only be '_'
   return 'black'
 }
-
-export interface TPlayerMove { player_id: number, playerCards: [TPlayerCard, TPlayerCard], infectionCards: TInfectionCard[] }
 
 export function playerCardIcon (card: TPlayerCard): JSX.Element {
   switch (card) {

@@ -12,6 +12,7 @@ import InitialPlayerCardsLog from './components/InitialPlayerCards'
 import InitialInfectionsLog from './components/InitialInfections'
 import Paper from '@mui/material/Paper'
 import { List } from '@mui/material'
+import { genHistoryRows } from './utils'
 
 export default class App extends React.Component<{}, TState> {
   state: TState = {
@@ -24,15 +25,13 @@ export default class App extends React.Component<{}, TState> {
     initialInfections: Array(9).fill('_'),
 
     // Game state
-    history: [
-      { player_id: 0, playerCards: ['Red', 'Blue'], infectionCards: ['Atlanta', 'Chicago'] },
-      { player_id: 1, playerCards: ['Yellow', 'Epidemic'], infectionCards: ['Algiers', 'Osaka', 'Kinshasa'] }
-    ]
+    history: []
   }
 
   constructor (props: {}) {
     super(props)
     this.setState = this.setState.bind(this)
+    this.state.history = genHistoryRows(this.state.fundingLevel, this.state.positionToPlayerId)
   }
 
   render (): React.ReactNode {
@@ -42,7 +41,7 @@ export default class App extends React.Component<{}, TState> {
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
             Players:
           </Typography>
-          <DraggableAvatarStack players={this.state.players} playerColors={this.state.playerColors} positionToPlayerId={this.state.positionToPlayerId} setState={this.setState} />
+          <DraggableAvatarStack parentState={this.state} setParentState={this.setState} />
           <p></p>
           <Typography variant="h3" component="h3" gutterBottom>
             Game Setup
@@ -70,7 +69,12 @@ export default class App extends React.Component<{}, TState> {
             }}
             value={this.state.fundingLevel}
             onChange={(event) =>
-              this.setState((current: TState) => ({ ...current, fundingLevel: Number(event.target.value) }))
+              this.setState((current: TState) =>
+                ({
+                  ...current,
+                  fundingLevel: Number(event.target.value),
+                  history: genHistoryRows(Number(event.target.value), this.state.positionToPlayerId)
+                }))
             }
           />
           <p></p>
@@ -80,7 +84,7 @@ export default class App extends React.Component<{}, TState> {
           cards.
           <p></p>
           Cards dealt:
-          <Paper sx={{ width: '100%', height: 400, maxWidth: 600, bgcolor: 'background.paper' }} elevation={3}>
+          <Paper sx={{ width: '100%' }} elevation={3}>
             <List
               sx={{
                 width: '100%',
@@ -103,7 +107,7 @@ export default class App extends React.Component<{}, TState> {
           </Typography>
           <p></p>
           Drag to reorder players
-          <DraggableAvatarStack players={this.state.players} playerColors={this.state.playerColors} positionToPlayerId={this.state.positionToPlayerId} setState={this.setState} />
+          <DraggableAvatarStack parentState={this.state} setParentState={this.setState} />
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>Game Log</Typography>
           <Paper sx={{ width: '100%', height: 400, maxWidth: 900, bgcolor: 'background.paper' }} elevation={3}>
