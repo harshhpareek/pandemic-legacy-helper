@@ -44,12 +44,13 @@ const BlueCities = ['Atlanta', 'Chicago', 'Essen', 'London', 'Madrid', 'Milan', 
 const BlackCities = ['Algiers', 'Baghdad', 'Cairo', 'Chennai', 'Delhi', 'Istanbul', 'Karachi', 'Kolkata', 'Moscow', 'Mumbai', 'Riyadh', 'Tehran'] as const
 const YellowCities = ['Bogota', 'Buenos Aries', 'Johannesburg', 'Khartoum', 'Kinshasa', 'Lagos', 'Lima', 'Los Angeles', 'Mexico City', 'Miami', 'Santiago', 'Sao Paulo'] as const
 const RedCities = ['Bangkok', 'Beijing', 'Ho Chi Minh City', 'Hong Kong', 'Jakarta', 'Manila', 'Osaka', 'Seoul', 'Shanghai', 'Sydney', 'Taipei', 'Tokyo'] as const
+export const AllCities = ['_', ...BlueCities, ...BlackCities, ...YellowCities, ...RedCities]
 
 export type TBlueInfectionCard = typeof BlueCities[number]
 export type TBlackInfectionCard = typeof BlackCities[number]
 export type TYellowInfectionCard = typeof YellowCities[number]
 export type TRedInfectionCard = typeof RedCities[number]
-export type TInfectionCard = '_' | TBlueInfectionCard | TBlackInfectionCard | TYellowInfectionCard | TRedInfectionCard
+export type TInfectionCard = typeof AllCities[number]
 
 export function infectionCardColor (card: TInfectionCard): string {
   if (BlueCities.find((city) => card === city) !== undefined) {
@@ -65,6 +66,7 @@ export function infectionCardColor (card: TInfectionCard): string {
   if (RedCities.find((city) => card === city) !== undefined) {
     return 'red'
   }
+  // This should only be '_'
   return 'black'
 }
 

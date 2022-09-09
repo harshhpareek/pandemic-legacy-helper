@@ -20,8 +20,8 @@ export default class App extends React.Component<{}, TState> {
     playerColors: ['Blue', 'Black', 'White', 'Pink'],
     fundingLevel: 4,
     positionToPlayerId: [0, 1, 2, 3],
-    initialPlayerCards: [],
-    initialInfections: [],
+    initialPlayerCards: Array(4).fill(['_', '_']),
+    initialInfections: Array(9).fill('_'),
 
     // Game state
     history: [
@@ -39,33 +39,27 @@ export default class App extends React.Component<{}, TState> {
     return (
       <Container>
         <Box>
+          <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
+            Players:
+          </Typography>
+          <DraggableAvatarStack players={this.state.players} playerColors={this.state.playerColors} positionToPlayerId={this.state.positionToPlayerId} setState={this.setState} />
+          <p></p>
           <Typography variant="h3" component="h3" gutterBottom>
             Game Setup
           </Typography>
           Follow the <Link href="https://www.boardgamebarrister.com/unboxing-pandemic-legacy/" target="_blank" rel="noopener">Legacy Season 1 setup guide </Link>:
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
-            Steps 1-4: Infect 9 cities
+            Step 4: Infect 9 cities
           </Typography>
-          Enter the cities here:
-          <Paper sx={{ width: '100%', height: 400, maxWidth: 900, bgcolor: 'background.paper' }} elevation={3}>
-            <List
-              sx={{
-                width: '100%',
-                maxWidth: 360,
-                bgcolor: 'background.paper',
-                position: 'relative',
-                overflow: 'auto',
-                maxHeight: 300,
-                '& ul': { padding: 0 }
-              }}
-            >
+          <Paper elevation={3}>
+            <List>
               <InitialInfectionsLog parentState={this.state} setParentState={this.setState}></InitialInfectionsLog>
             </List>
           </Paper>
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
-            Steps 5-6: Add funded events to player deck and deal cards
+            Step 6: Add funded events to player deck and deal cards
           </Typography>
           <TextField
             label="Funding Level"
@@ -86,11 +80,11 @@ export default class App extends React.Component<{}, TState> {
           cards.
           <p></p>
           Cards dealt:
-          <Paper sx={{ width: '100%', height: 400, maxWidth: 900, bgcolor: 'background.paper' }} elevation={3}>
+          <Paper sx={{ width: '100%', height: 400, maxWidth: 600, bgcolor: 'background.paper' }} elevation={3}>
             <List
               sx={{
                 width: '100%',
-                maxWidth: 360,
+                maxWidth: 600,
                 bgcolor: 'background.paper',
                 position: 'relative',
                 overflow: 'auto',
@@ -105,10 +99,10 @@ export default class App extends React.Component<{}, TState> {
           The position by which epidemics MUST occur are:
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
-            Step 7-10: Player names, order and colors
+            Step 10: Player Order
           </Typography>
           <p></p>
-          Click to update player initials below and select pawn colors. Drag to reorder players.
+          Drag to reorder players
           <DraggableAvatarStack players={this.state.players} playerColors={this.state.playerColors} positionToPlayerId={this.state.positionToPlayerId} setState={this.setState} />
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>Game Log</Typography>
