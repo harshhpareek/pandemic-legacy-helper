@@ -58,7 +58,7 @@ export function infectionCardColor (card: TInfectionCard): string {
     return 'blue'
   }
   if (BlackCities.find((city) => card === city) !== undefined) {
-    return 'black'
+    return 'brown'
   }
   if (YellowCities.find((city) => card === city) !== undefined) {
     return 'orange'
@@ -79,7 +79,7 @@ export function playerCardIcon (card: TPlayerCard): JSX.Element {
     case 'Epidemic':
       return <Icon path={mdiBiohazard} color="red" size="25" />
     case 'Black':
-      return <CoronavirusOutlinedIcon sx={{ color: 'black' }} />
+      return <CoronavirusOutlinedIcon sx={{ color: 'brown' }} />
     case 'Yellow':
       return <CoronavirusOutlinedIcon sx={{ color: 'orange' }} />
     case 'Blue':
