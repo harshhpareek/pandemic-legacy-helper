@@ -1,5 +1,6 @@
 import IndeterminateCheckBoxOutlinedIcon from '@mui/icons-material/IndeterminateCheckBoxOutlined'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import Container from '@mui/material/Container'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
@@ -11,7 +12,7 @@ import GameLog from './components/GameLog'
 import InitialPlayerCardsLog from './components/InitialPlayerCards'
 import InitialInfectionsLog from './components/InitialInfections'
 import Paper from '@mui/material/Paper'
-import { List } from '@mui/material'
+import { List, TextareaAutosize } from '@mui/material'
 import { genHistoryRows } from './utils'
 
 export default class App extends React.Component<{}, TState> {
@@ -25,7 +26,10 @@ export default class App extends React.Component<{}, TState> {
     initialInfections: Array(9).fill('_'),
 
     // Game state
-    history: []
+    history: [],
+
+    // debug
+    textArea: ''
   }
 
   constructor (props: {}) {
@@ -139,7 +143,28 @@ export default class App extends React.Component<{}, TState> {
             <li>{playerCardIcon('Funded')}: Funded event</li>
           </ul>
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>(Debug) State</Typography>
-          <pre>{JSON.stringify(this.state, null, 2)}</pre>
+          <Button onClick={() => {
+            this.setState({
+              ...this.state,
+              textArea: JSON.stringify(this.state, null, 2)
+            })
+          }}>
+            Dump state to Text Area</Button>
+          <Button onClick={() => {
+            this.setState({ ...JSON.parse(this.state.textArea), textArea: '' })
+          }}>Set state (dangerously) from Text Area</Button>
+          <p></p>
+          <TextareaAutosize
+            minRows={5}
+            style={{ width: '100%' }}
+            value={this.state.textArea}
+            onChange={(event) => {
+              this.setState({
+                ...this.state,
+                textArea: event.target.value
+              })
+            }}
+          />
         </Box >
       </Container >
     )

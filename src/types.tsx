@@ -18,6 +18,9 @@ export interface TState {
   initialInfections: TInfectionCard[]
   // Game State
   history: TPlayerMove[]
+
+  // debug
+  textArea: string
 }
 
 export interface TPlayerMove {
