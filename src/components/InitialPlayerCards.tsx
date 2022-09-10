@@ -1,6 +1,6 @@
 import { ListItem, ListItemAvatar, Avatar, ListItemText, FormControl, MenuItem, Select } from '@mui/material'
 import * as React from 'react'
-import { playerCardIcon, TState, PlayerCardTypes } from '../types'
+import { playerCardIcon, TState, PlayerCardTypes, TPlayerCard } from '../types'
 import { stringAvatar } from './DraggableAvatarStack'
 
 interface InitialPlayerCardsLogProps {
@@ -36,6 +36,7 @@ export default class InitialPlayerCardsLog extends React.Component<InitialPlayer
             ><Select
               value={handCard}
               onChange={(event) => {
+                const newCard = event.target.value as TPlayerCard
                 this.props.setParentState(
                   (current: TState) =>
                     ({
@@ -43,7 +44,7 @@ export default class InitialPlayerCardsLog extends React.Component<InitialPlayer
                       initialPlayerCards:
                       initialPlayerCards.map((hand, k) =>
                         (k === playerId
-                          ? (handCardIdx === 0 ? [event.target.value, hand[1]] : [hand[0], event.target.value])
+                          ? (handCardIdx === 0 ? [newCard, hand[1]] : [hand[0], newCard])
                           : hand))
                     }))
               }}

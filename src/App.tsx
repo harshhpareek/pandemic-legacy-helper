@@ -14,6 +14,7 @@ import InitialInfectionsLog from './components/InitialInfections'
 import Paper from '@mui/material/Paper'
 import { List, TextareaAutosize } from '@mui/material'
 import { genHistoryRows } from './utils'
+import Inferences from './components/Inferences'
 
 export default class App extends React.Component<{}, TState> {
   state: TState = {
@@ -47,6 +48,7 @@ export default class App extends React.Component<{}, TState> {
           </Typography>
           <DraggableAvatarStack parentState={this.state} setParentState={this.setState} />
           <p></p>
+
           <Typography variant="h3" component="h3" gutterBottom>
             Game Setup
           </Typography>
@@ -114,7 +116,7 @@ export default class App extends React.Component<{}, TState> {
           <DraggableAvatarStack parentState={this.state} setParentState={this.setState} />
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>Game Log</Typography>
-          <Paper sx={{ width: '100%', height: 400, maxWidth: 900, bgcolor: 'background.paper' }} elevation={3}>
+          <Paper elevation={3}>
             <List
               sx={{
                 width: '100%',
@@ -129,6 +131,9 @@ export default class App extends React.Component<{}, TState> {
               <GameLog parentState={this.state} setParentState={this.setState} />
             </List>
           </Paper>
+
+          <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Inferences </Typography>
+          <Inferences parentState={this.state}></Inferences>
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Glossary </Typography>
           <ul>

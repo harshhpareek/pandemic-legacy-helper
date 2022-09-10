@@ -1,4 +1,4 @@
-import { TPlayerMove } from './types'
+import { TPlayerCard, TPlayerMove } from './types'
 
 export function cumSum (arr: number[]): number[] {
   const newArr = new Array<number>(arr.length)
@@ -25,8 +25,8 @@ export function genHistoryRows (fundingLevel: number, positionToPlayerId: number
   const remainder = totalPlayerCards % 5
   const minPileSize = Math.floor(totalPlayerCards / 5)
   const pileSizes =
-      (new Array<number>(remainder).fill(minPileSize + 1)).concat(
-        (new Array<number>(5 - remainder).fill(minPileSize)))
+    (new Array<number>(remainder).fill(minPileSize + 1)).concat(
+      (new Array<number>(5 - remainder).fill(minPileSize)))
   const pileTransitions = cumSum(pileSizes)
   const numRounds = Math.ceil(totalPlayerCards / 2)
 
@@ -34,7 +34,9 @@ export function genHistoryRows (fundingLevel: number, positionToPlayerId: number
     const numInfCards = numInfectionCards(pileNum(pileTransitions, n * 2))
     return {
       playerId: positionToPlayerId[n % 4],
-      playerCards: (n === numRounds - 1 && totalPlayerCards % 2 === 1) ? ['_'] : ['_', '_'],
+      playerCards: (n === numRounds - 1 && totalPlayerCards % 2 === 1)
+        ? ['_' as TPlayerCard]
+        : ['_' as TPlayerCard, '_' as TPlayerCard],
       infectionCards: Array(numInfCards).fill('_')
     }
   })

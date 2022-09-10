@@ -49,7 +49,7 @@ export function pawnColor (color: TPawnColor): string {
 }
 
 // For the player deck, we will not track individual player cards, just the colour
-export const PlayerCardTypes = ['_', 'Epidemic', 'Black', 'Yellow', 'Blue', 'Red', 'Funded']
+export const PlayerCardTypes = ['_', 'Epidemic', 'Black', 'Yellow', 'Blue', 'Red', 'Funded'] as const
 export type TPlayerCard = typeof PlayerCardTypes[number]
 
 // For the Infection Deck, we will track each card
