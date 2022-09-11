@@ -2,21 +2,40 @@ import IndeterminateCheckBoxOutlinedIcon from '@mui/icons-material/Indeterminate
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Container from '@mui/material/Container'
+import Link from '@mui/material/Link'
+import List from '@mui/material/List'
+import Paper from '@mui/material/Paper'
+import TextareaAutosize from '@mui/material/TextareaAutosize'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import * as React from 'react'
-import { playerCardIcon, TState, TPlayerMove } from './types'
-import Link from '@mui/material/Link'
 import DraggableAvatarStack from './components/DraggableAvatarStack'
 import GameLog from './components/GameLog'
-import InitialPlayerCardsLog from './components/InitialPlayerCards'
-import InitialInfectionsLog from './components/InitialInfections'
-import Paper from '@mui/material/Paper'
-import { List, TextareaAutosize } from '@mui/material'
-import { genHistoryRows } from './utils'
 import Inferences from './components/Inferences'
+import InitialInfectionsLog from './components/InitialInfections'
+import InitialPlayerCardsLog from './components/InitialPlayerCards'
+import { cumSum } from './utils'
+import { playerCardIcon, TPlayerCard, TPlayerMove, TState } from './types'
+
+function pileNum (pileTransitions: number[], position: number): number {
+  return pileTransitions.findIndex((n) => n > position)
+}
+
+function numInfectionCards (pileNum: number): number {
+  if (pileNum === -1) {
+    return 2
+  } else {
+    // infection cards: (< EP1) 2, (> EP1) 2, (> EP2) 2, (>EP3) 3, (> EP4) 3, (> EP5) 4
+    const infectionArr = [2, 2, 3, 3, 4]
+    return infectionArr[pileNum]
+  }
+}
 
 export default class App extends React.Component<{}, TState> {
+  totalPlayerCards: number = -1
+  pileSizes: number[] = []
+  pileTransitions: number[] = []
+
   state: TState = {
     // Game Setup settings
     players: ['HP', 'CJ', 'MT', 'SK'],
@@ -36,7 +55,59 @@ export default class App extends React.Component<{}, TState> {
   constructor (props: {}) {
     super(props)
     this.setState = this.setState.bind(this)
-    this.state.history = genHistoryRows(this.state.fundingLevel, this.state.positionToPlayerId)
+    this.state.history = this.regenerateGameLog()
+  }
+
+  componentDidUpdate (_prevProps: {}, prevState: TState): void {
+    if (prevState.fundingLevel !== this.state.fundingLevel || prevState.positionToPlayerId !== this.state.positionToPlayerId) {
+      this.setState({ ...this.state, history: this.regenerateGameLog() })
+    }
+  }
+
+  regenerateGameLog (): TPlayerMove[] {
+    // funded events + 48 city cards - 8 cards initially dealt to players + 5 epidemics
+    this.totalPlayerCards = 45 + this.state.fundingLevel
+    const remainder = this.totalPlayerCards % 5
+    const minPileSize = Math.floor(this.totalPlayerCards / 5)
+    this.pileSizes =
+      (new Array<number>(remainder).fill(minPileSize + 1)).concat(
+        (new Array<number>(5 - remainder).fill(minPileSize)))
+    this.pileTransitions = cumSum(this.pileSizes)
+
+    const numRounds = Math.ceil(this.totalPlayerCards / 2)
+    const oldHistory = [...this.state.history]
+    const newHistory = new Array(numRounds).fill(null).map((_, n) => {
+      // TODO:make sure this is always right
+      const numInfCards = numInfectionCards(
+        pileNum(this.pileTransitions, n * 2))
+
+      const getPlayerCards = (): TPlayerCard[] => {
+        if (n === numRounds - 1 && this.totalPlayerCards % 2 === 1) {
+          return [(n < oldHistory.length)
+            ? oldHistory[n].playerCards[0]
+            : '_'
+          ]
+        } else {
+          return Array(2).fill('_').map((card, m) => (n < oldHistory.length)
+            ? (oldHistory[n].playerCards[m] ?? card)
+            : card)
+        }
+      }
+      const playerCards = getPlayerCards()
+      const infectionCards = Array(numInfCards).fill('_').map(
+        (card, m) =>
+          (n < oldHistory.length && m < oldHistory[n].infectionCards.length) ? oldHistory[n].infectionCards[m] : card
+      )
+
+      return {
+        // If game log is being regenerate, we will rewrite who received the cards
+        playerId: this.state.positionToPlayerId[n % 4],
+        playerCards,
+        infectionCards
+      }
+    })
+
+    return newHistory
   }
 
   render (): React.ReactNode {
@@ -78,27 +149,25 @@ export default class App extends React.Component<{}, TState> {
               this.setState((current: TState) =>
                 ({
                   ...current,
-                  fundingLevel: Number(event.target.value),
-                  history: genHistoryRows(Number(event.target.value), this.state.positionToPlayerId)
+                  fundingLevel: Number(event.target.value)
                 }))
             }
           />
           <p></p>
           Give two cards to each player. This page assumes 4 players. You
-          should now have <b>40 cards</b>. Add funded events. Split into 5
-          piles and add <span style={{ color: 'red' }}>Epidemic</span>{' '}
+          should now have <b>{48 + this.state.fundingLevel} cards</b>. Add funded events. Split into 5
+          piles of sizes {this.pileSizes.join(', ')} and add <span style={{ color: 'red' }}>Epidemic</span>{' '}
           cards.
           <p></p>
           Cards dealt:
-          <Paper sx={{ width: '100%' }} elevation={3}>
+          <Paper elevation={3}>
             <List
               sx={{
                 width: '100%',
-                maxWidth: 600,
+                maxWidth: 360,
                 bgcolor: 'background.paper',
                 position: 'relative',
                 overflow: 'auto',
-                maxHeight: 300,
                 '& ul': { padding: 0 }
               }}
             >
@@ -117,14 +186,14 @@ export default class App extends React.Component<{}, TState> {
 
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>Game Log</Typography>
           <Paper elevation={3}>
-            <List
+            <List dense
               sx={{
                 width: '100%',
                 maxWidth: 360,
                 bgcolor: 'background.paper',
                 position: 'relative',
                 overflow: 'auto',
-                maxHeight: 300,
+                maxHeight: 400,
                 '& ul': { padding: 0 }
               }}
             >
@@ -149,8 +218,7 @@ export default class App extends React.Component<{}, TState> {
           </ul>
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>(Debug) State</Typography>
           <Button variant="contained" onClick={() => {
-            const newPositionToPlayerId = [0, 3, 1, 2]
-            const newHistory = genHistoryRows(this.state.fundingLevel, newPositionToPlayerId)
+            const newHistory = [...this.state.history]
             const toCopy = [
               { playerId: 0, playerCards: ['Red', 'Funded'], infectionCards: ['Milan', 'Khartoum'] },
               { playerId: 3, playerCards: ['Black', 'Yellow'], infectionCards: ['Sao Paulo', 'Manila'] },
@@ -166,7 +234,8 @@ export default class App extends React.Component<{}, TState> {
             })
             this.setState({
               ...this.state,
-              positionToPlayerId: newPositionToPlayerId,
+              fundingLevel: 4,
+              positionToPlayerId: [0, 3, 1, 2],
               initialPlayerCards: [['Black', 'Black'], ['Yellow', 'Blue'], ['Funded', 'Black'], ['Red', 'Black']],
               initialInfections: ['Paris', 'Kinshasa', 'London', 'Osaka', 'Cairo', 'Riyadh', 'Delhi', 'St. Petersburg', 'Bogota'],
               history: newHistory

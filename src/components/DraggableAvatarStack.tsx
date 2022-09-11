@@ -8,7 +8,6 @@ import {
 import { pawnColor, TPawnColor, TState } from '../types'
 import Stack from '@mui/material/Stack'
 import NameDialog from './NameDialog'
-import { genHistoryRows } from '../utils'
 
 export function stringAvatar (name: string, color: TPawnColor): { sx: { bgcolor: string }, children: string } {
   return {
@@ -51,8 +50,7 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
     })
     this.props.setParentState((current: TState) => ({
       ...current,
-      positionToPlayerId: newPositionToPlayerId,
-      history: genHistoryRows(this.props.parentState.fundingLevel, newPositionToPlayerId)
+      positionToPlayerId: newPositionToPlayerId
     }))
   }
 

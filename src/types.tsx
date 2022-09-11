@@ -16,6 +16,7 @@ export interface TState {
   positionToPlayerId: number[]
   initialPlayerCards: TPlayerCard[][]
   initialInfections: TInfectionCard[]
+
   // Game State
   history: TPlayerMove[]
 
