@@ -22,12 +22,11 @@ export default class InitialInfectionsLog extends React.Component<InitialInfecti
               sx={{ color: infectionCardColor(card) }}
               onChange={(event) => {
                 this.props.setParentState(
-                  (current: TState) =>
-                    ({
-                      ...current,
-                      initialInfections:
+                  {
+                    ...this.props.parentState,
+                    initialInfections:
                       infections.map((inf, k) => (k === i ? event.target.value : inf))
-                    }))
+                  })
               }}
             >
               {AllCities.map((city, j) => {

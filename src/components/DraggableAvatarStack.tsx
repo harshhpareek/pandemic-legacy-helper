@@ -48,10 +48,10 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
       // Should never happen. This will crash the program
       return -1
     })
-    this.props.setParentState((current: TState) => ({
-      ...current,
+    this.props.setParentState({
+      ...this.props.parentState,
       positionToPlayerId: newPositionToPlayerId
-    }))
+    })
   }
 
   render (): React.ReactNode {
@@ -83,12 +83,10 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
                             color={playerColors[playerId]}
                             onClose={() => { setShowNameDialog(false) }}
                             onChangeName={(name: string) => {
-                              this.props.setParentState((current: TState) =>
-                                ({ ...current, players: players.map((oldName, j) => (j === playerId ? name : oldName)) }))
+                              this.props.setParentState({ ...this.props.parentState, players: players.map((oldName, j) => (j === playerId ? name : oldName)) })
                             }}
                             onChangeColor={(color: TPawnColor) => {
-                              this.props.setParentState((current: TState) =>
-                                ({ ...current, playerColors: playerColors.map((oldColor, j) => (j === playerId ? color : oldColor)) }))
+                              this.props.setParentState({ ...this.props.parentState, playerColors: playerColors.map((oldColor, j) => (j === playerId ? color : oldColor)) })
                             }} />
                           <Avatar component={Paper} elevation={5} {...stringAvatar(players[playerId], playerColors[playerId])} onClick={() => { setShowNameDialog(true) }} />
                         </div>)}

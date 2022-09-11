@@ -146,11 +146,11 @@ export default class App extends React.Component<{}, TState> {
             }}
             value={this.state.fundingLevel}
             onChange={(event) =>
-              this.setState((current: TState) =>
-                ({
-                  ...current,
+              this.setState(
+                {
+                  ...this.state,
                   fundingLevel: Number(event.target.value)
-                }))
+                })
             }
           />
           <p></p>

@@ -44,10 +44,9 @@ export default class GameLog extends React.Component<GameLogProps, {}> {
                     value={handCard}
                     onChange={(event) => {
                       this.props.setParentState(
-                        (current: TState) =>
-                          ({
-                            ...current,
-                            history:
+                        {
+                          ...this.props.parentState,
+                          history:
                             history.map((oldRow, k) => {
                               if (k !== histIdx) {
                                 return oldRow
@@ -62,7 +61,7 @@ export default class GameLog extends React.Component<GameLogProps, {}> {
                               }
                             }
                             )
-                          }))
+                        })
                     }}
                     IconComponent={() => null}
                     inputProps={
@@ -95,10 +94,9 @@ export default class GameLog extends React.Component<GameLogProps, {}> {
                       IconComponent={() => null}
                       onChange={(event) => {
                         this.props.setParentState(
-                          (current: TState) =>
-                            ({
-                              ...current,
-                              history:
+                          {
+                            ...this.props.parentState,
+                            history:
                               history.map((oldRow, k) => {
                                 if (k !== histIdx) {
                                   return oldRow
@@ -109,7 +107,7 @@ export default class GameLog extends React.Component<GameLogProps, {}> {
                                 }
                               }
                               )
-                            }))
+                          })
                       }}
                     >
                       {AllCities.map((city, j) => {

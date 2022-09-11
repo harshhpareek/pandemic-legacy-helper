@@ -38,15 +38,14 @@ export default class InitialPlayerCardsLog extends React.Component<InitialPlayer
               onChange={(event) => {
                 const newCard = event.target.value as TPlayerCard
                 this.props.setParentState(
-                  (current: TState) =>
-                    ({
-                      ...current,
-                      initialPlayerCards:
+                  {
+                    ...this.props.parentState,
+                    initialPlayerCards:
                       initialPlayerCards.map((hand, k) =>
                         (k === playerId
                           ? (handCardIdx === 0 ? [newCard, hand[1]] : [hand[0], newCard])
                           : hand))
-                    }))
+                  })
               }}
               IconComponent={() => null}
               inputProps={
