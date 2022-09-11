@@ -1,9 +1,10 @@
 import { Alert } from '@mui/material'
 import * as React from 'react'
-import { TState, TPlayerCard, TInfectionCard } from '../types'
+import { TGameLog, TGameSetup, TInfectionCard, TPlayerCard } from '../types'
 
 interface InferencesProps {
-  parentState: TState
+  parentState: TGameSetup
+  gameLog: TGameLog
 }
 
 export default class InitialInfectionsLog extends React.Component<InferencesProps, {}> {
@@ -26,7 +27,7 @@ export default class InitialInfectionsLog extends React.Component<InferencesProp
       })
     })
 
-    this.props.parentState.history.forEach(({ playerCards }) => {
+    this.props.gameLog.forEach(({ playerCards }) => {
       playerCards.forEach(card => {
         playerDeckPosition++
         if (card === 'Epidemic') {
@@ -48,7 +49,7 @@ export default class InitialInfectionsLog extends React.Component<InferencesProp
       this.infectionCardsOnTop.push(card)
     })
 
-    this.props.parentState.history.forEach(({ playerCards, infectionCards }) => {
+    this.props.gameLog.forEach(({ playerCards, infectionCards }) => {
       if (playerCards.includes('Epidemic')) {
         // The cards drawn after epidemic
         this.pastInfectionCardStacks.push(this.infectionCardsOnTop)

@@ -1,12 +1,11 @@
 import Avatar from '@mui/material/Avatar'
 import Paper from '@mui/material/Paper'
+import Stack from '@mui/material/Stack'
 import * as React from 'react'
 import {
-  DragDropContext,
-  Droppable, DropResult, Draggable
+  DragDropContext, Draggable, Droppable, DropResult
 } from 'react-beautiful-dnd'
-import { pawnColor, TPawnColor, TState } from '../types'
-import Stack from '@mui/material/Stack'
+import { pawnColor, TGameSetup, TPawnColor } from '../types'
 import NameDialog from './NameDialog'
 
 export function stringAvatar (name: string, color: TPawnColor): { sx: { bgcolor: string }, children: string } {
@@ -19,8 +18,8 @@ export function stringAvatar (name: string, color: TPawnColor): { sx: { bgcolor:
 }
 
 interface TAvatarProps {
-  parentState: TState
-  setParentState: React.Dispatch<React.SetStateAction<TState>>
+  parentState: TGameSetup
+  setParentState: React.Dispatch<React.SetStateAction<TGameSetup>>
 }
 
 export default class DraggableAvatarStack extends React.Component<TAvatarProps, {}> {

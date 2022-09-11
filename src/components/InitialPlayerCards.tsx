@@ -1,11 +1,11 @@
-import { ListItem, ListItemAvatar, Avatar, ListItemText, FormControl, MenuItem, Select } from '@mui/material'
+import { Avatar, FormControl, ListItem, ListItemAvatar, ListItemText, MenuItem, Select } from '@mui/material'
 import * as React from 'react'
-import { playerCardIcon, TState, PlayerCardTypes, TPlayerCard } from '../types'
+import { playerCardIcon, PlayerCardTypes, TGameSetup, TPlayerCard } from '../types'
 import { stringAvatar } from './DraggableAvatarStack'
 
 interface InitialPlayerCardsLogProps {
-  parentState: TState
-  setParentState: React.Dispatch<React.SetStateAction<TState>>
+  parentState: TGameSetup
+  setParentState: React.Dispatch<React.SetStateAction<TGameSetup>>
 }
 
 export default class InitialPlayerCardsLog extends React.Component<InitialPlayerCardsLogProps, {}> {

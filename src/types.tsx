@@ -1,14 +1,14 @@
 
-import * as React from 'react'
 import { mdiBiohazard } from '@mdi/js'
 import Icon from '@mdi/react'
 import CoronavirusOutlinedIcon from '@mui/icons-material/CoronavirusOutlined'
 import CurrencyBitcoinIcon from '@mui/icons-material/CurrencyBitcoin'
 import IndeterminateCheckBoxOutlinedIcon from '@mui/icons-material/IndeterminateCheckBoxOutlined'
+import * as React from 'react'
 
-import { grey, pink, indigo } from '@mui/material/colors'
+import { grey, indigo, pink } from '@mui/material/colors'
 
-export interface TState {
+export interface TGameSetup {
   // Game Setup settings
   players: string[]
   playerColors: TPawnColor[]
@@ -16,21 +16,17 @@ export interface TState {
   positionToPlayerId: number[]
   initialPlayerCards: TPlayerCard[][]
   initialInfections: TInfectionCard[]
-
-  // Game State
-  history: TPlayerMove[]
-
-  // debug
-  textArea: string
 }
 
-export interface TPlayerMove {
+export interface TGameLogRow {
   playerId: number
   playerCards: TPlayerCard[]
   infectionCards: TInfectionCard[]
 }
 
-export function newHistoryRow (playerId: number): TPlayerMove {
+export type TGameLog = TGameLogRow[]
+
+export function newHistoryRow (playerId: number): TGameLogRow {
   return {
     playerId,
     playerCards: ['_', '_'],

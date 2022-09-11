@@ -1,10 +1,10 @@
 import { ListItem, ListItemText, FormControl, MenuItem, Select } from '@mui/material'
 import * as React from 'react'
-import { AllCities, infectionCardColor, TState } from '../types'
+import { AllCities, infectionCardColor, TGameSetup } from '../types'
 
 interface InitialInfectionsLogProps {
-  parentState: TState
-  setParentState: React.Dispatch<React.SetStateAction<TState>>
+  parentState: TGameSetup
+  setParentState: React.Dispatch<React.SetStateAction<TGameSetup>>
 }
 
 export default class InitialInfectionsLog extends React.Component<InitialInfectionsLogProps, {}> {
