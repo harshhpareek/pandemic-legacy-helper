@@ -30,7 +30,11 @@ export interface TPlayerMove {
 }
 
 export function newHistoryRow (playerId: number): TPlayerMove {
-  return { playerId, playerCards: ['_', '_'], infectionCards: ['_', '_'] }
+  return {
+    playerId,
+    playerCards: ['_', '_'],
+    infectionCards: ['_', '_']
+  }
 }
 
 export type TPawnColor = 'Blue' | 'Pink' | 'White' | 'Black'
@@ -49,15 +53,81 @@ export function pawnColor (color: TPawnColor): string {
 }
 
 // For the player deck, we will not track individual player cards, just the colour
-export const PlayerCardTypes = ['_', 'Epidemic', 'Black', 'Yellow', 'Blue', 'Red', 'Funded'] as const
+export const PlayerCardTypes = [
+  '_',
+  'Epidemic',
+  'Black',
+  'Yellow',
+  'Blue',
+  'Red',
+  'Funded'
+] as const
 export type TPlayerCard = typeof PlayerCardTypes[number]
 
 // For the Infection Deck, we will track each card
-const BlueCities = ['Atlanta', 'Chicago', 'Essen', 'London', 'Madrid', 'Milan', 'Montreal', 'New York', 'Paris', 'San Francisco', 'St. Petersburg', 'Washington'] as const
-const BlackCities = ['Algiers', 'Baghdad', 'Cairo', 'Chennai', 'Delhi', 'Istanbul', 'Karachi', 'Kolkata', 'Moscow', 'Mumbai', 'Riyadh', 'Tehran'] as const
-const YellowCities = ['Bogota', 'Buenos Aries', 'Johannesburg', 'Khartoum', 'Kinshasa', 'Lagos', 'Lima', 'Los Angeles', 'Mexico City', 'Miami', 'Santiago', 'Sao Paulo'] as const
-const RedCities = ['Bangkok', 'Beijing', 'Ho Chi Minh City', 'Hong Kong', 'Jakarta', 'Manila', 'Osaka', 'Seoul', 'Shanghai', 'Sydney', 'Taipei', 'Tokyo'] as const
-export const AllCities = ['_', ...BlueCities, ...BlackCities, ...YellowCities, ...RedCities]
+const BlueCities = [
+  'Atlanta',
+  'Chicago',
+  'Essen',
+  'London',
+  'Madrid',
+  'Milan',
+  'Montreal',
+  'New York',
+  'Paris',
+  'San Francisco',
+  'St. Petersburg',
+  'Washington'
+] as const
+const BlackCities = [
+  'Algiers',
+  'Baghdad',
+  'Cairo',
+  'Chennai',
+  'Delhi',
+  'Istanbul',
+  'Karachi',
+  'Kolkata',
+  'Moscow',
+  'Mumbai',
+  'Riyadh',
+  'Tehran'
+] as const
+const YellowCities = [
+  'Bogota',
+  'Buenos Aries',
+  'Johannesburg',
+  'Khartoum',
+  'Kinshasa',
+  'Lagos',
+  'Lima',
+  'Los Angeles',
+  'Mexico City',
+  'Miami',
+  'Santiago',
+  'Sao Paulo'
+] as const
+const RedCities = [
+  'Bangkok',
+  'Beijing',
+  'Ho Chi Minh City',
+  'Hong Kong',
+  'Jakarta',
+  'Manila',
+  'Osaka',
+  'Seoul',
+  'Shanghai',
+  'Sydney',
+  'Taipei',
+  'Tokyo'
+] as const
+export const AllCities = [
+  '_',
+  ...BlueCities,
+  ...BlackCities,
+  ...YellowCities,
+  ...RedCities
+]
 
 export type TBlueInfectionCard = typeof BlueCities[number]
 export type TBlackInfectionCard = typeof BlackCities[number]

@@ -5,7 +5,7 @@ import Container from '@mui/material/Container'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import * as React from 'react'
-import { playerCardIcon, TState } from './types'
+import { playerCardIcon, TState, TPlayerMove } from './types'
 import Link from '@mui/material/Link'
 import DraggableAvatarStack from './components/DraggableAvatarStack'
 import GameLog from './components/GameLog'
@@ -148,6 +148,31 @@ export default class App extends React.Component<{}, TState> {
             <li>{playerCardIcon('Funded')}: Funded event</li>
           </ul>
           <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>(Debug) State</Typography>
+          <Button variant="contained" onClick={() => {
+            const newPositionToPlayerId = [0, 3, 1, 2]
+            const newHistory = genHistoryRows(this.state.fundingLevel, newPositionToPlayerId)
+            const toCopy = [
+              { playerId: 0, playerCards: ['Red', 'Funded'], infectionCards: ['Milan', 'Khartoum'] },
+              { playerId: 3, playerCards: ['Black', 'Yellow'], infectionCards: ['Sao Paulo', 'Manila'] },
+              { playerId: 1, playerCards: ['Blue', 'Red'], infectionCards: ['Taipei', 'Istanbul'] },
+              { playerId: 2, playerCards: ['Epidemic', 'Yellow'], infectionCards: ['Istanbul', 'Khartoum'] },
+              { playerId: 0, playerCards: ['Blue', 'Blue'], infectionCards: ['St. Petersburg', 'Taipei'] },
+              { playerId: 3, playerCards: ['Yellow', 'Red'], infectionCards: ['Kinshasa', 'Milan'] },
+              { playerId: 1, playerCards: ['Epidemic', 'Funded'], infectionCards: ['Istanbul', 'Taipei'] },
+              { playerId: 2, playerCards: ['Red', 'Black'], infectionCards: ['Kinshasa', 'Khartoum'] }
+            ] as TPlayerMove[]
+            toCopy.forEach((move, i) => {
+              newHistory[i] = toCopy[i]
+            })
+            this.setState({
+              ...this.state,
+              positionToPlayerId: newPositionToPlayerId,
+              initialPlayerCards: [['Black', 'Black'], ['Yellow', 'Blue'], ['Funded', 'Black'], ['Red', 'Black']],
+              initialInfections: ['Paris', 'Kinshasa', 'London', 'Osaka', 'Cairo', 'Riyadh', 'Delhi', 'St. Petersburg', 'Bogota'],
+              history: newHistory
+            })
+          }}>Load Test State</Button>
+          <p></p>
           <Button onClick={() => {
             this.setState({
               ...this.state,

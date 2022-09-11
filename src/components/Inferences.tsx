@@ -71,10 +71,13 @@ export default class InitialInfectionsLog extends React.Component<InferencesProp
     this.trackInfectionCards()
     return (<>
       {this.alerts.map((alert, i) => <Alert key={i} severity="error">{alert}</Alert>)}
-      <h4>Infection Cards</h4>
+      <h4>Infection Cards on Top</h4>
+      <pre>{JSON.stringify(this.infectionCardsOnTop, null, 2)}</pre>
+      <h4>Upcoming Infection Cards</h4>
+      <pre>{JSON.stringify(this.infectionCardsOnTop, null, 2)}</pre>
+      <h4> Past Infection Cards</h4>
       <pre>{JSON.stringify(this.pastInfectionCardStacks, null, 2)}</pre>
       <p></p>
-      <pre>{JSON.stringify(this.infectionCardsOnTop)}</pre>
       <h4>Player Card counts</h4>
       <pre>{JSON.stringify(Object.fromEntries(this.playerCardCounts), null, 2)}</pre>
     </>)
