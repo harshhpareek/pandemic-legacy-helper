@@ -96,7 +96,6 @@ export default function App (): JSX.Element {
     initialPlayerCards: Array(4).fill(['_', '_']),
     initialInfections: Array(9).fill('_')
   })
-  const [debugTextArea, setDebugTextArea] = useState<string>('')
 
   const { totalPlayerCards, pileSizes, generatedGameLog } = regenerateGameLog(setup.fundingLevel, setup.positionToPlayerId)
   const [gameLog, setGameLog] = useState<TGameLog>(generatedGameLog)
@@ -174,7 +173,7 @@ export default function App (): JSX.Element {
               '& ul': { padding: 0 }
             }}
           >
-            <InitialPlayerCardsLog parentState={setup} setParentState={setSetup}></InitialPlayerCardsLog>
+            <InitialPlayerCardsLog minWidth={60} parentState={setup} setParentState={setSetup}></InitialPlayerCardsLog>
           </List>
         </Paper>
         <p></p>
@@ -198,7 +197,7 @@ export default function App (): JSX.Element {
               '& ul': { padding: 0 }
             }}
           >
-            <GameLog parentState={setup} setParentState={setSetup} gameLog={gameLog} setGameLog={setGameLog}/>
+            <GameLog minWidth={60} parentState={setup} setParentState={setSetup} gameLog={gameLog} setGameLog={setGameLog} />
           </List>
         </Paper>
 
@@ -206,62 +205,85 @@ export default function App (): JSX.Element {
         <Inferences parentState={setup} gameLog={gameLog}></Inferences>
 
         <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Glossary </Typography>
-        <ul>
-          <li>
-            <IndeterminateCheckBoxOutlinedIcon />: Not entered yet
-          </li>
-          <li>{playerCardIcon('Epidemic')}: Epidemic</li>
-          <li>{playerCardIcon('Black')}: Black city player card</li>
-          <li>{playerCardIcon('Yellow')}: Yellow city player card</li>
-          <li>{playerCardIcon('Blue')}: Blue city player card</li>
-          <li>{playerCardIcon('Red')}: Red city player card</li>
-          <li>{playerCardIcon('Funded')}: Funded event</li>
-        </ul>
-        <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>(Debug) State</Typography>
-        <Button variant="contained" onClick={() => {
-          setSetup({
-            ...setup,
-            fundingLevel: 4,
-            positionToPlayerId: [0, 3, 1, 2],
-            initialPlayerCards: [['Black', 'Black'], ['Yellow', 'Blue'], ['Funded', 'Black'], ['Red', 'Black']],
-            initialInfections: ['Paris', 'Kinshasa', 'London', 'Osaka', 'Cairo', 'Riyadh', 'Delhi', 'St. Petersburg', 'Bogota']
-          })
+        <Glossary />
 
-          const newGameLog = [...gameLog]
-          const toCopy = [
-            { playerId: 0, playerCards: ['Red', 'Funded'], infectionCards: ['Milan', 'Khartoum'] },
-            { playerId: 3, playerCards: ['Black', 'Yellow'], infectionCards: ['Sao Paulo', 'Manila'] },
-            { playerId: 1, playerCards: ['Blue', 'Red'], infectionCards: ['Taipei', 'Istanbul'] },
-            { playerId: 2, playerCards: ['Epidemic', 'Yellow'], infectionCards: ['Istanbul', 'Khartoum'] },
-            { playerId: 0, playerCards: ['Blue', 'Blue'], infectionCards: ['St. Petersburg', 'Taipei'] },
-            { playerId: 3, playerCards: ['Yellow', 'Red'], infectionCards: ['Kinshasa', 'Milan'] },
-            { playerId: 1, playerCards: ['Epidemic', 'Funded'], infectionCards: ['Istanbul', 'Taipei'] },
-            { playerId: 2, playerCards: ['Red', 'Black'], infectionCards: ['Kinshasa', 'Khartoum'] }
-          ] as TGameLog
-          toCopy.forEach((move, i) => {
-            newGameLog[i] = toCopy[i]
-          })
-          setGameLog(newGameLog)
-        }}>Load Test State</Button>
-        <p></p>
-        <Button onClick={() => {
-          setDebugTextArea(JSON.stringify(setup, null, 2))
-        }}>
-          Dump state to Text Area</Button>
-        <Button onClick={() => {
-          setSetup(JSON.parse(debugTextArea))
-        }}>Set state (dangerously) from Text Area</Button>
-        <p></p>
-        <TextareaAutosize
-          minRows={5}
-          style={{ width: '100%' }}
-          value={debugTextArea}
-          onChange={(event) =>
-            setDebugTextArea(
-              event.target.value)
-          }
-        />
+        <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>(Debug) State</Typography>
+        <Debug setup={setup} setSetup={setSetup} gameLog={gameLog} setGameLog={setGameLog} />
       </Box >
     </Container >
+  )
+}
+
+function Glossary (): JSX.Element {
+  return (<>
+    <ul>
+      <li>
+        <IndeterminateCheckBoxOutlinedIcon />: Not entered yet
+      </li>
+      <li>{playerCardIcon('Epidemic')}: Epidemic</li>
+      <li>{playerCardIcon('Black')}: Black city player card</li>
+      <li>{playerCardIcon('Yellow')}: Yellow city player card</li>
+      <li>{playerCardIcon('Blue')}: Blue city player card</li>
+      <li>{playerCardIcon('Red')}: Red city player card</li>
+      <li>{playerCardIcon('Funded')}: Funded event</li>
+    </ul></>)
+}
+
+interface TDebugProps {
+  setup: TGameSetup
+  setSetup: React.Dispatch<React.SetStateAction<TGameSetup>>
+  gameLog: TGameLog
+  setGameLog: React.Dispatch<React.SetStateAction<TGameLog>>
+}
+
+function Debug ({ setup, setSetup, gameLog, setGameLog }: TDebugProps): JSX.Element {
+  const [debugTextArea, setDebugTextArea] = useState<string>('')
+
+  return (
+    <>
+      <Button variant="contained" onClick={() => {
+        setSetup({
+          ...setup,
+          fundingLevel: 4,
+          positionToPlayerId: [0, 3, 1, 2],
+          initialPlayerCards: [['Black', 'Black'], ['Yellow', 'Blue'], ['Funded', 'Black'], ['Red', 'Black']],
+          initialInfections: ['Paris', 'Kinshasa', 'London', 'Osaka', 'Cairo', 'Riyadh', 'Delhi', 'St. Petersburg', 'Bogota']
+        })
+
+        const newGameLog = [...gameLog]
+        const toCopy = [
+          { playerId: 0, playerCards: ['Red', 'Funded'], infectionCards: ['Milan', 'Khartoum'] },
+          { playerId: 3, playerCards: ['Black', 'Yellow'], infectionCards: ['Sao Paulo', 'Manila'] },
+          { playerId: 1, playerCards: ['Blue', 'Red'], infectionCards: ['Taipei', 'Istanbul'] },
+          { playerId: 2, playerCards: ['Epidemic', 'Yellow'], infectionCards: ['Istanbul', 'Khartoum'] },
+          { playerId: 0, playerCards: ['Blue', 'Blue'], infectionCards: ['St. Petersburg', 'Taipei'] },
+          { playerId: 3, playerCards: ['Yellow', 'Red'], infectionCards: ['Kinshasa', 'Milan'] },
+          { playerId: 1, playerCards: ['Epidemic', 'Funded'], infectionCards: ['Istanbul', 'Taipei'] },
+          { playerId: 2, playerCards: ['Red', 'Black'], infectionCards: ['Kinshasa', 'Khartoum'] }
+        ] as TGameLog
+        toCopy.forEach((move, i) => {
+          newGameLog[i] = toCopy[i]
+        })
+        setGameLog(newGameLog)
+      }}>Load Test State</Button>
+      <p></p>
+      <Button onClick={() => {
+        setDebugTextArea(JSON.stringify(setup, null, 2))
+      }}>
+        Dump state to Text Area</Button>
+      <Button onClick={() => {
+        setSetup(JSON.parse(debugTextArea))
+      }}>Set state (dangerously) from Text Area</Button>
+      <p></p>
+      <TextareaAutosize
+        minRows={5}
+        style={{ width: '100%' }}
+        value={debugTextArea}
+        onChange={(event) =>
+          setDebugTextArea(
+            event.target.value)
+        }
+      />
+    </>
   )
 }

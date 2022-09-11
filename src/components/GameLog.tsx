@@ -10,6 +10,7 @@ interface GameLogProps {
   setParentState: React.Dispatch<React.SetStateAction<TGameSetup>>
   gameLog: TGameLog
   setGameLog: React.Dispatch<React.SetStateAction<TGameLog>>
+  minWidth: number
 }
 
 export default class GameLog extends React.Component<GameLogProps, {}> {
@@ -21,7 +22,7 @@ export default class GameLog extends React.Component<GameLogProps, {}> {
       <ListSubheader>Initial Infections</ListSubheader>
       <InitialInfectionsLog parentState={this.props.parentState} setParentState={this.props.setParentState}></InitialInfectionsLog>
       <ListSubheader>Initial Player Cards</ListSubheader>
-      <InitialPlayerCardsLog parentState={this.props.parentState} setParentState={this.props.setParentState}></InitialPlayerCardsLog>
+      <InitialPlayerCardsLog minWidth={this.props.minWidth} parentState={this.props.parentState} setParentState={this.props.setParentState}></InitialPlayerCardsLog>
       {history.map((row, histIdx) => {
         return (
           <React.Fragment key={histIdx}>
@@ -36,7 +37,7 @@ export default class GameLog extends React.Component<GameLogProps, {}> {
                   <FormControl
                     key={handCardIdx}
                     sx={{
-                      minWidth: 60,
+                      minWidth: this.props.minWidth,
                       alignItems: 'center',
                       '& .MuiOutlinedInput-notchedOutline': {
                         borderWidth: '0 !important'

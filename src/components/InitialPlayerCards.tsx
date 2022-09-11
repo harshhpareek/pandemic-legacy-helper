@@ -6,6 +6,7 @@ import { stringAvatar } from './DraggableAvatarStack'
 interface InitialPlayerCardsLogProps {
   parentState: TGameSetup
   setParentState: React.Dispatch<React.SetStateAction<TGameSetup>>
+  minWidth: number
 }
 
 export default class InitialPlayerCardsLog extends React.Component<InitialPlayerCardsLogProps, {}> {
@@ -27,7 +28,7 @@ export default class InitialPlayerCardsLog extends React.Component<InitialPlayer
             <FormControl
               key={handCardIdx}
               sx={{
-                minWidth: 60,
+                minWidth: this.props.minWidth,
                 alignItems: 'center',
                 '& .MuiOutlinedInput-notchedOutline': {
                   borderWidth: '0 !important'
