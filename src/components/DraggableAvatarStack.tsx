@@ -20,6 +20,7 @@ export function stringAvatar (name: string, color: TPawnColor): { sx: { bgcolor:
 interface TAvatarProps {
   parentState: TGameSetup
   setParentState: React.Dispatch<React.SetStateAction<TGameSetup>>
+  regenGameLog: (newPositionToPlayerId: number[]) => void
 }
 
 export default class DraggableAvatarStack extends React.Component<TAvatarProps, {}> {
@@ -51,6 +52,7 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
       ...this.props.parentState,
       positionToPlayerId: newPositionToPlayerId
     })
+    this.props.regenGameLog(newPositionToPlayerId)
   }
 
   render (): React.ReactNode {

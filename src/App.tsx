@@ -18,7 +18,7 @@ import InitialPlayerCardsLog from './components/InitialPlayerCards'
 import { cumSum } from './utils'
 import { playerCardIcon, TPlayerCard, TGameLogRow, TGameSetup, TGameLog } from './types'
 import { initializeApp } from 'firebase/app'
-import { getDatabase, ref, set, child, get } from 'firebase/database'
+import { getDatabase, ref, set, child, get, onValue } from 'firebase/database'
 
 function pileNum (pileTransitions: number[], position: number): number {
   return pileTransitions.findIndex((n) => n > position)
@@ -34,11 +34,7 @@ function numInfectionCards (pileNum: number): number {
   }
 }
 
-function regenerateGameLog (fundingLevel: number, positionToPlayerId: number[], oldGameLog?: TGameLog): {
-  totalPlayerCards: number
-  pileSizes: number[]
-  generatedGameLog: TGameLog
-} {
+function genGameLog (fundingLevel: number, positionToPlayerId: number[], oldGameLog?: TGameLog): TGameLog {
   // funded events + 48 city cards - 8 cards initially dealt to players + 5 epidemics
   const totalPlayerCards = 45 + fundingLevel
   const remainder = totalPlayerCards % 5
@@ -81,11 +77,17 @@ function regenerateGameLog (fundingLevel: number, positionToPlayerId: number[], 
     return newGameLogRow
   })
 
-  return {
-    totalPlayerCards,
-    pileSizes,
-    generatedGameLog
-  }
+  return generatedGameLog
+}
+
+interface TLastUpdatedTextProps {
+  lastUpdatedByUser: string
+  lastUpdatedTimestamp: number
+}
+function LastUpdatedText (props: TLastUpdatedTextProps): JSX.Element {
+  return <p><small><i>
+    Last updated by: {props.lastUpdatedByUser} at {props.lastUpdatedTimestamp > 0 ? (new Date(props.lastUpdatedTimestamp)).toLocaleString() : ''}
+  </i></small></p>
 }
 
 export default function App (): JSX.Element {
@@ -102,7 +104,8 @@ export default function App (): JSX.Element {
   const app = initializeApp(firebaseConfig)
   const db = getDatabase(app)
 
-  const [key, setKey] = useState('123')
+  const [key, setKey] = useState('')
+  const [user, setUser] = useState('')
   const [isLoaded, setIsLoaded] = useState(false)
 
   const [setup, setSetup] = useState<TGameSetup>({
@@ -114,57 +117,92 @@ export default function App (): JSX.Element {
     initialPlayerCards: Array(4).fill(['_', '_']),
     initialInfections: Array(9).fill('_')
   })
+  const [gameLog, setGameLog] = useState<TGameLog>(genGameLog(4, [0, 1, 2, 3]))
 
-  console.log(process.env)
-  console.log(firebaseConfig)
+  // Timestamp represents last manual action. Automatic state updates don't update timestamp
+  const [timestamp, setTimestamp] = useState(0)
+  const [lastUpdatedByUser, setLastUpdatedByUser] = useState('')
+  const [lastUpdatedTimestamp, setLastUpdatedTimestamp] = useState(0)
+  function setSetupWithTimestamp (setup: React.SetStateAction<TGameSetup>): void {
+    setTimestamp(Date.now())
+    setSetup(setup)
+  }
+  function setGameLogWithTimestamp (gameLog: React.SetStateAction<TGameLog>): void {
+    setTimestamp(Date.now())
+    setGameLog(gameLog)
+  }
 
-  const { totalPlayerCards, pileSizes, generatedGameLog } = regenerateGameLog(setup.fundingLevel, setup.positionToPlayerId)
-  const [gameLog, setGameLog] = useState<TGameLog>(generatedGameLog)
+  React.useEffect(() => {
+    // Write state only if there is a user-generated change
+    if (timestamp > 0 && timestamp > lastUpdatedTimestamp) {
+      set(ref(db, 'state/' + key), { setup, gameLog, user, timestamp }).then((value) => {
+        console.log('Write succeeded! for', timestamp)
+      }).catch((reason) => {
+        alert('Write failed! ' + JSON.stringify(reason))
+      })
+    }
+  }, [setup, gameLog])
 
-  // componentDidUpdate (_prevProps: {}, prevState: TState): void {
-  //   if (this.state.isWaiting) {
-  //     return
-  //   }
-  //   if (prevState.fundingLevel !== this.state.fundingLevel || prevState.positionToPlayerId !== this.state.positionToPlayerId || prevState.isWaiting !== this.state.isWaiting) {
-  //     this.setState({ ...this.state, history: this.regenerateGameLog() })
-  //   }
-  // }
+  React.useEffect(() => {
+    onValue(ref(db, 'state/' + key), (snapshot) => {
+      if (snapshot.exists()) {
+        if (snapshot.val().user !== lastUpdatedByUser && snapshot.val().timestamp !== lastUpdatedTimestamp) {
+          console.log('Updating state to ' + String(snapshot.val().user) + 'at ' + String(snapshot.val().timestamp))
+          setSetup(snapshot.val().setup)
+          setGameLog(snapshot.val().gameLog)
+          setLastUpdatedByUser(snapshot.val().user)
+          setLastUpdatedTimestamp(snapshot.val().timestamp)
+        }
+      } else {
+        alert('Database read called without a snapshot')
+      }
+    })
+  }, [lastUpdatedTimestamp])
 
+  const totalPlayerCards = 0
+  const pileSizes: number[] = []
   return (
     <Container>
       <Box>
         <p></p>
-        <TextField label="Key" value={key} onChange={(event) => setKey(event.target.value)} />
-        <Button onClick={() => {
-          get(child(ref(db), `state/${key}`)).then((snapshot) => {
-            if (snapshot.exists()) {
-              const loadedSetup: TGameSetup = snapshot.val().setup
-              setSetup(loadedSetup)
-              const loadedGameLog: TGameLog = snapshot.val().gameLog
-              setGameLog(loadedGameLog)
-              console.log(snapshot.val())
-            } else {
-              console.log('No data available')
-            }
-            // XXX: Should actually be set true after setState is finished
-            setIsLoaded(true)
-          }).catch((error) => {
-            alert(error)
-            console.error(error)
-          })
-        }}>Create/Load state</Button>
-        <Button onClick={() => {
-          set(ref(db, 'state/' + key), { setup, gameLog }).then((value) => {
-            console.log('Write succeeded!', value)
-          }).catch((reason) => {
-            console.log('Write failed!', reason)
-          })
-        }}>Set state</Button>
+        <TextField label="Game Code" value={key} onChange={(event) => setKey(event.target.value)} />
+        <p></p>
+        <TextField label="User" value={user} onChange={(event) => setUser(event.target.value)} />
+        <p></p>
+        <Button variant="contained" onClick={() => {
+          if (key === '' || user === '') {
+            alert('Enter something pls fren')
+          } else {
+            get(child(ref(db), `state/${key}`)).then((snapshot) => {
+              if (snapshot.exists()) {
+                const loadedSetup: TGameSetup = snapshot.val().setup
+                setSetup(loadedSetup)
+                const loadedGameLog: TGameLog = snapshot.val().gameLog
+                setGameLog(loadedGameLog)
+                const lastUpdatedByUser: string = snapshot.val().user
+                setLastUpdatedByUser(lastUpdatedByUser)
+                const lastUpdatedTimestamp: number = snapshot.val().timestamp
+                setLastUpdatedTimestamp(lastUpdatedTimestamp)
+              } else {
+                // This is a new game. This is fine. A new key will be uploaded on next user interaction.
+              }
+              // XXX: Should actually be set true after setState is finished, but its probably not going to be noticeable
+              setIsLoaded(true)
+            }).catch((error) => {
+              alert(error)
+              console.error(error)
+            })
+          }
+        }}>Connect</Button>
+        <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
+
         {isLoaded &&
           (<><Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
             Players:
           </Typography>
-            <DraggableAvatarStack parentState={setup} setParentState={setSetup} />
+            <DraggableAvatarStack parentState={setup} setParentState={setSetupWithTimestamp} regenGameLog={(newPositionToPlayerId: number[]) => setGameLog(genGameLog(
+              setup.fundingLevel, newPositionToPlayerId, gameLog
+            ))} />
             <p></p>
 
             <Typography variant="h3" component="h3" gutterBottom>
@@ -183,9 +221,10 @@ export default function App (): JSX.Element {
                 maxHeight: 400,
                 '& ul': { padding: 0 }
               }}>
-                <InitialInfectionsLog parentState={setup} setParentState={setSetup}></InitialInfectionsLog>
+                <InitialInfectionsLog parentState={setup} setParentState={setSetupWithTimestamp}></InitialInfectionsLog>
               </List>
             </Paper>
+            <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
 
             <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
               Step 6: Add funded events to player deck and deal cards
@@ -198,12 +237,16 @@ export default function App (): JSX.Element {
                 shrink: true
               }}
               value={setup.fundingLevel}
-              onChange={(event) =>
+              onChange={(event) => {
                 setSetup(
                   {
                     ...setup,
                     fundingLevel: Number(event.target.value)
                   })
+                setGameLog(genGameLog(
+                  Number(event.target.value), setup.positionToPlayerId, gameLog
+                ))
+              }
               }
             />
             <p></p>
@@ -222,9 +265,10 @@ export default function App (): JSX.Element {
                   '& ul': { padding: 0 }
                 }}
               >
-                <InitialPlayerCardsLog minWidth={60} parentState={setup} setParentState={setSetup}></InitialPlayerCardsLog>
+                <InitialPlayerCardsLog minWidth={60} parentState={setup} setParentState={setSetupWithTimestamp}></InitialPlayerCardsLog>
               </List>
             </Paper>
+            <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
             <p></p>
             The position by which epidemics MUST occur are:
 
@@ -233,7 +277,9 @@ export default function App (): JSX.Element {
             </Typography>
             <p></p>
             Drag to reorder players
-            <DraggableAvatarStack parentState={setup} setParentState={setSetup} />
+            <DraggableAvatarStack parentState={setup} setParentState={setSetupWithTimestamp} regenGameLog={(newPositionToPlayerId: number[]) => setGameLog(genGameLog(
+              setup.fundingLevel, newPositionToPlayerId, gameLog
+            ))} />
 
             <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>Game Log</Typography>
             <Paper sx={{ maxWidth: 360 }} elevation={3}>
@@ -246,9 +292,10 @@ export default function App (): JSX.Element {
                   '& ul': { padding: 0 }
                 }}
               >
-                <GameLog minWidth={60} parentState={setup} setParentState={setSetup} gameLog={gameLog} setGameLog={setGameLog} />
+                <GameLog minWidth={60} parentState={setup} setParentState={setSetupWithTimestamp} gameLog={gameLog} setGameLog={setGameLogWithTimestamp} />
               </List>
             </Paper>
+            <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
 
             <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Inferences </Typography>
             <Inferences parentState={setup} gameLog={gameLog}></Inferences>
