@@ -146,12 +146,14 @@ export default function App (): JSX.Element {
   React.useEffect(() => {
     onValue(ref(db, 'state/' + key), (snapshot) => {
       if (snapshot.exists()) {
-        if (snapshot.val().user !== lastUpdatedByUser && snapshot.val().timestamp !== lastUpdatedTimestamp) {
-          console.log('Updating state to ' + String(snapshot.val().user) + 'at ' + String(snapshot.val().timestamp))
-          setSetup(snapshot.val().setup)
-          setGameLog(snapshot.val().gameLog)
-          setLastUpdatedByUser(snapshot.val().user)
-          setLastUpdatedTimestamp(snapshot.val().timestamp)
+        if (snapshot.val().user !== null && snapshot.val().user !== undefined) {
+          if (snapshot.val().user !== lastUpdatedByUser && snapshot.val().timestamp !== lastUpdatedTimestamp) {
+            console.log('Updating state to ' + String(snapshot.val().user) + 'at ' + String(snapshot.val().timestamp))
+            setSetup(snapshot.val().setup)
+            setGameLog(snapshot.val().gameLog)
+            setLastUpdatedByUser(snapshot.val().user)
+            setLastUpdatedTimestamp(snapshot.val().timestamp)
+          }
         }
       } else {
         alert('Database read called without a snapshot')
