@@ -17,6 +17,8 @@ import InitialInfectionsLog from './components/InitialInfections'
 import InitialPlayerCardsLog from './components/InitialPlayerCards'
 import { cumSum } from './utils'
 import { playerCardIcon, TPlayerCard, TGameLogRow, TGameSetup, TGameLog } from './types'
+import { initializeApp } from 'firebase/app'
+import { getDatabase, ref, set, child, get } from 'firebase/database'
 
 function pileNum (pileTransitions: number[], position: number): number {
   return pileTransitions.findIndex((n) => n > position)
@@ -87,6 +89,22 @@ function regenerateGameLog (fundingLevel: number, positionToPlayerId: number[], 
 }
 
 export default function App (): JSX.Element {
+  const firebaseConfig = {
+    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+    authDomain: 'pandemic-legacy-helper.firebaseapp.com',
+    projectId: 'pandemic-legacy-helper',
+    storageBucket: 'pandemic-legacy-helper.appspot.com',
+    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.REACT_APP_FIREBASE_APP_ID,
+    measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
+    databaseURL: 'https://pandemic-legacy-helper-default-rtdb.firebaseio.com/'
+  }
+  const app = initializeApp(firebaseConfig)
+  const db = getDatabase(app)
+
+  const [key, setKey] = useState('123')
+  const [isLoaded, setIsLoaded] = useState(false)
+
   const [setup, setSetup] = useState<TGameSetup>({
     // Game Setup settings
     players: ['HP', 'CJ', 'MT', 'SK'],
@@ -96,6 +114,9 @@ export default function App (): JSX.Element {
     initialPlayerCards: Array(4).fill(['_', '_']),
     initialInfections: Array(9).fill('_')
   })
+
+  console.log(process.env)
+  console.log(firebaseConfig)
 
   const { totalPlayerCards, pileSizes, generatedGameLog } = regenerateGameLog(setup.fundingLevel, setup.positionToPlayerId)
   const [gameLog, setGameLog] = useState<TGameLog>(generatedGameLog)
@@ -112,103 +133,133 @@ export default function App (): JSX.Element {
   return (
     <Container>
       <Box>
-        <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
-          Players:
-        </Typography>
-        <DraggableAvatarStack parentState={setup} setParentState={setSetup} />
         <p></p>
+        <TextField label="Key" value={key} onChange={(event) => setKey(event.target.value)} />
+        <Button onClick={() => {
+          get(child(ref(db), `state/${key}`)).then((snapshot) => {
+            if (snapshot.exists()) {
+              const loadedSetup: TGameSetup = snapshot.val().setup
+              setSetup(loadedSetup)
+              const loadedGameLog: TGameLog = snapshot.val().gameLog
+              setGameLog(loadedGameLog)
+              console.log(snapshot.val())
+            } else {
+              console.log('No data available')
+            }
+            // XXX: Should actually be set true after setState is finished
+            setIsLoaded(true)
+          }).catch((error) => {
+            alert(error)
+            console.error(error)
+          })
+        }}>Create/Load state</Button>
+        <Button onClick={() => {
+          set(ref(db, 'state/' + key), { setup, gameLog }).then((value) => {
+            console.log('Write succeeded!', value)
+          }).catch((reason) => {
+            console.log('Write failed!', reason)
+          })
+        }}>Set state</Button>
+        {isLoaded &&
+          (<><Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
+            Players:
+          </Typography>
+            <DraggableAvatarStack parentState={setup} setParentState={setSetup} />
+            <p></p>
 
-        <Typography variant="h3" component="h3" gutterBottom>
-          Game Setup
-        </Typography>
-        Follow the <Link href="https://www.boardgamebarrister.com/unboxing-pandemic-legacy/" target="_blank" rel="noopener">Legacy Season 1 setup guide </Link>:
+            <Typography variant="h3" component="h3" gutterBottom>
+              Game Setup
+            </Typography>
+            Follow the <Link href="https://www.boardgamebarrister.com/unboxing-pandemic-legacy/" target="_blank" rel="noopener">Legacy Season 1 setup guide </Link>:
 
-        <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
-          Step 4: Infect 9 cities
-        </Typography>
-        <Paper sx={{ maxWidth: 360 }} elevation={3}>
-          <List sx={{
-            maxWidth: 360,
-            position: 'relative',
-            overflow: 'auto',
-            maxHeight: 400,
-            '& ul': { padding: 0 }
-          }}>
-            <InitialInfectionsLog parentState={setup} setParentState={setSetup}></InitialInfectionsLog>
-          </List>
-        </Paper>
+            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
+              Step 4: Infect 9 cities
+            </Typography>
+            <Paper sx={{ maxWidth: 360 }} elevation={3}>
+              <List sx={{
+                maxWidth: 360,
+                position: 'relative',
+                overflow: 'auto',
+                maxHeight: 400,
+                '& ul': { padding: 0 }
+              }}>
+                <InitialInfectionsLog parentState={setup} setParentState={setSetup}></InitialInfectionsLog>
+              </List>
+            </Paper>
 
-        <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
-          Step 6: Add funded events to player deck and deal cards
-        </Typography>
-        <TextField
-          label="Funding Level"
-          variant="filled"
-          type="number"
-          InputLabelProps={{
-            shrink: true
-          }}
-          value={setup.fundingLevel}
-          onChange={(event) =>
-            setSetup(
-              {
-                ...setup,
-                fundingLevel: Number(event.target.value)
-              })
-          }
-        />
-        <p></p>
-        Give two cards to each player. This page assumes 4 players. You
-        should now have <b>{totalPlayerCards} cards</b>. Add funded events. Split into 5
-        piles of sizes {pileSizes.join(', ')} and add <span style={{ color: 'red' }}>Epidemic</span>{' '}
-        cards.
-        <p></p>
-        Cards dealt:
-        <Paper sx={{ maxWidth: 360 }} elevation={3}>
-          <List
-            sx={{
-              maxWidth: 360,
-              position: 'relative',
-              overflow: 'auto',
-              '& ul': { padding: 0 }
-            }}
-          >
-            <InitialPlayerCardsLog minWidth={60} parentState={setup} setParentState={setSetup}></InitialPlayerCardsLog>
-          </List>
-        </Paper>
-        <p></p>
-        The position by which epidemics MUST occur are:
+            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
+              Step 6: Add funded events to player deck and deal cards
+            </Typography>
+            <TextField
+              label="Funding Level"
+              variant="filled"
+              type="number"
+              InputLabelProps={{
+                shrink: true
+              }}
+              value={setup.fundingLevel}
+              onChange={(event) =>
+                setSetup(
+                  {
+                    ...setup,
+                    fundingLevel: Number(event.target.value)
+                  })
+              }
+            />
+            <p></p>
+            Give two cards to each player. This page assumes 4 players. You
+            should now have <b>{totalPlayerCards} cards</b>. Add funded events. Split into 5
+            piles of sizes {pileSizes.join(', ')} and add <span style={{ color: 'red' }}>Epidemic</span>{' '}
+            cards.
+            <p></p>
+            Cards dealt:
+            <Paper sx={{ maxWidth: 360 }} elevation={3}>
+              <List
+                sx={{
+                  maxWidth: 360,
+                  position: 'relative',
+                  overflow: 'auto',
+                  '& ul': { padding: 0 }
+                }}
+              >
+                <InitialPlayerCardsLog minWidth={60} parentState={setup} setParentState={setSetup}></InitialPlayerCardsLog>
+              </List>
+            </Paper>
+            <p></p>
+            The position by which epidemics MUST occur are:
 
-        <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
-          Step 10: Player Order
-        </Typography>
-        <p></p>
-        Drag to reorder players
-        <DraggableAvatarStack parentState={setup} setParentState={setSetup} />
+            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
+              Step 10: Player Order
+            </Typography>
+            <p></p>
+            Drag to reorder players
+            <DraggableAvatarStack parentState={setup} setParentState={setSetup} />
 
-        <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>Game Log</Typography>
-        <Paper sx={{ maxWidth: 360 }} elevation={3}>
-          <List dense
-            sx={{
-              maxWidth: 360,
-              position: 'relative',
-              overflow: 'auto',
-              maxHeight: 400,
-              '& ul': { padding: 0 }
-            }}
-          >
-            <GameLog minWidth={60} parentState={setup} setParentState={setSetup} gameLog={gameLog} setGameLog={setGameLog} />
-          </List>
-        </Paper>
+            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>Game Log</Typography>
+            <Paper sx={{ maxWidth: 360 }} elevation={3}>
+              <List dense
+                sx={{
+                  maxWidth: 360,
+                  position: 'relative',
+                  overflow: 'auto',
+                  maxHeight: 400,
+                  '& ul': { padding: 0 }
+                }}
+              >
+                <GameLog minWidth={60} parentState={setup} setParentState={setSetup} gameLog={gameLog} setGameLog={setGameLog} />
+              </List>
+            </Paper>
 
-        <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Inferences </Typography>
-        <Inferences parentState={setup} gameLog={gameLog}></Inferences>
+            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Inferences </Typography>
+            <Inferences parentState={setup} gameLog={gameLog}></Inferences>
 
-        <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Glossary </Typography>
-        <Glossary />
+            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Glossary </Typography>
+            <Glossary />
 
-        <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>(Debug) State</Typography>
-        <Debug setup={setup} setSetup={setSetup} gameLog={gameLog} setGameLog={setGameLog} />
+            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>(Debug) State</Typography>
+            <Debug setup={setup} setSetup={setSetup} gameLog={gameLog} setGameLog={setGameLog} />
+          </>
+          )}
       </Box >
     </Container >
   )
