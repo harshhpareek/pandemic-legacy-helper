@@ -163,9 +163,11 @@ export default function App (): JSX.Element {
 
   const totalPlayerCards = 0
   const pileSizes: number[] = []
+
+  // iPhone X dimensions are 375x812 px
   return (
     <Container>
-      <Box>
+      <Box sx={{ maxWidth: 370 }}>
         <p></p>
         <TextField label="Game Code" value={key} onChange={(event) => setKey(event.target.value)} />
         <p></p>
