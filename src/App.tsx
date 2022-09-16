@@ -249,8 +249,8 @@ export default function App (): JSX.Element {
 
 function Glossary (): JSX.Element {
   return (<>
-    <MoreVertIcon />: End of a pile in the Player deck
     <ul>
+      <li> <MoreVertIcon />: End of a pile in the Player deck </li>
       <li>
         <IndeterminateCheckBoxOutlinedIcon />: Not entered yet
       </li>

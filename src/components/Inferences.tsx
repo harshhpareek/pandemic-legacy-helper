@@ -111,7 +111,7 @@ export default function Inferences (props: InferencesProps): JSX.Element {
     <h4>Upcoming Infection Cards</h4>
     <InfectionCardChipStack cards={Array.from(upcomingInfectionCards)} />
     {props.isDebug && (<><h4> Current position: {playerDeckPosition}. Pile {pileNum}. Cards left in this pile: {pileTransitions[pileNum] - playerDeckPosition}</h4>
-    Epidemics so far: {numEpidemics} at positions [{epidemicPositions.join(',')}], expected by {pileTransitions.join(', ')}</>)}
+      Epidemics so far: {numEpidemics} at positions [{epidemicPositions.join(',')}], expected by {pileTransitions.join(', ')}</>)}
     <h4> Past Summary: Infection Cards</h4>
     {pastInfectionCardStacks.map((stack, j) =>
       <div key={j}>
@@ -121,8 +121,25 @@ export default function Inferences (props: InferencesProps): JSX.Element {
     <p></p>
     <h4>Player Card counts</h4>
     <ul>
-      {PlayerCardTypes.map((cardType, i) =>
-        <li key={i}>{playerCardIcon(cardType)}: {playerCardCounts.get(cardType) ?? 0}</li>)}
+      {PlayerCardTypes.filter(c => c !== '_').map((cardType, i) =>
+        <li key={i}>{playerCardIcon(cardType)}: {playerCardCounts.get(cardType) ?? 0} {
+          '/ ' + String(getMaxForPlayerCardType(cardType, props.parentState.fundingLevel))
+        }
+        </li>)}
     </ul>
   </>)
+}
+
+function getMaxForPlayerCardType (cardType: TPlayerCard, fundingLevel: number): number | null {
+  switch (cardType) {
+    case 'Epidemic': return 5
+    case 'Black':
+    case 'Yellow':
+    case 'Blue':
+    case 'Red':
+      return 12
+    case 'Funded':
+      return fundingLevel
+  }
+  return null
 }
