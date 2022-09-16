@@ -1,3 +1,4 @@
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 import IndeterminateCheckBoxOutlinedIcon from '@mui/icons-material/IndeterminateCheckBoxOutlined'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
@@ -15,80 +16,11 @@ import GameLog from './components/GameLog'
 import Inferences from './components/Inferences'
 import InitialInfectionsLog from './components/InitialInfections'
 import InitialPlayerCardsLog from './components/InitialPlayerCards'
-import { cumSum } from './utils'
-import { playerCardIcon, TPlayerCard, TGameLogRow, TGameSetup, TGameLog } from './types'
+import { playerCardIcon, TGameSetup, TGameLog } from './types'
 import { initializeApp } from 'firebase/app'
+import { genGameLog, getPlayerDeckSetup } from './utils'
 import { getDatabase, ref, set, child, get, onValue } from 'firebase/database'
-
-function pileNum (pileTransitions: number[], position: number): number {
-  return pileTransitions.findIndex((n) => n > position)
-}
-
-function numInfectionCards (pileNum: number): number {
-  if (pileNum === -1) {
-    return 2
-  } else {
-    // infection cards: (< EP1) 2, (> EP1) 2, (> EP2) 2, (>EP3) 3, (> EP4) 3, (> EP5) 4
-    const infectionArr = [2, 2, 3, 3, 4]
-    return infectionArr[pileNum]
-  }
-}
-
-function genGameLog (fundingLevel: number, positionToPlayerId: number[], oldGameLog?: TGameLog): TGameLog {
-  // funded events + 48 city cards - 8 cards initially dealt to players + 5 epidemics
-  const totalPlayerCards = 45 + fundingLevel
-  const remainder = totalPlayerCards % 5
-  const minPileSize = Math.floor(totalPlayerCards / 5)
-  const pileSizes =
-    (new Array<number>(remainder).fill(minPileSize + 1)).concat(
-      (new Array<number>(5 - remainder).fill(minPileSize)))
-  const pileTransitions = cumSum(pileSizes)
-
-  const numRounds = Math.ceil(totalPlayerCards / 2)
-  // const oldHistory = [...this.state.history]
-  const generatedGameLog = new Array(numRounds).fill(null).map((_, n) => {
-    // TODO:make sure this is always right
-    const numInfCards = numInfectionCards(
-      pileNum(pileTransitions, n * 2))
-
-    const getPlayerCards = (): TPlayerCard[] => {
-      if (n === numRounds - 1 && totalPlayerCards % 2 === 1) {
-        return [((oldGameLog != null) && n < oldGameLog.length)
-          ? oldGameLog[n].playerCards[0]
-          : '_'
-        ]
-      } else {
-        return Array(2).fill('_').map((card, m) => ((oldGameLog != null) && n < oldGameLog.length)
-          ? (oldGameLog[n].playerCards[m] ?? card)
-          : card)
-      }
-    }
-    const playerCards = getPlayerCards()
-    const infectionCards = Array(numInfCards).fill('_').map(
-      (card, m) =>
-        ((oldGameLog != null) && n < oldGameLog.length && m < oldGameLog[n].infectionCards.length) ? oldGameLog[n].infectionCards[m] : card
-    )
-
-    const newGameLogRow: TGameLogRow = {
-      playerId: positionToPlayerId[n % 4],
-      playerCards,
-      infectionCards
-    }
-    return newGameLogRow
-  })
-
-  return generatedGameLog
-}
-
-interface TLastUpdatedTextProps {
-  lastUpdatedByUser: string
-  lastUpdatedTimestamp: number
-}
-function LastUpdatedText (props: TLastUpdatedTextProps): JSX.Element {
-  return <p><small><i>
-    Last updated by: {props.lastUpdatedByUser} at {props.lastUpdatedTimestamp > 0 ? (new Date(props.lastUpdatedTimestamp)).toLocaleString() : ''}
-  </i></small></p>
-}
+import LastUpdatedText from './components/LastUpdatedText'
 
 export default function App (): JSX.Element {
   const firebaseConfig = {
@@ -107,6 +39,7 @@ export default function App (): JSX.Element {
   const [key, setKey] = useState('')
   const [user, setUser] = useState('')
   const [isLoaded, setIsLoaded] = useState(false)
+  const [isDebug] = useState(false)
 
   const [setup, setSetup] = useState<TGameSetup>({
     // Game Setup settings
@@ -161,8 +94,7 @@ export default function App (): JSX.Element {
     })
   }, [lastUpdatedTimestamp])
 
-  const totalPlayerCards = 0
-  const pileSizes: number[] = []
+  const { totalPlayerCards, pileSizes } = getPlayerDeckSetup(setup.fundingLevel)
 
   // iPhone X dimensions are 375x812 px
   return (
@@ -254,10 +186,7 @@ export default function App (): JSX.Element {
               }
             />
             <p></p>
-            Give two cards to each player. This page assumes 4 players. You
-            should now have <b>{totalPlayerCards} cards</b>. Add funded events. Split into 5
-            piles of sizes {pileSizes.join(', ')} and add <span style={{ color: 'red' }}>Epidemic</span>{' '}
-            cards.
+            Adding funded events, you should have <b>{48 + setup.fundingLevel} </b> player cards (= funding level + 48 city cards, 12 of each color). Deal two cards to each player. (This page assumes 4 players)
             <p></p>
             Cards dealt:
             <Paper sx={{ maxWidth: 360 }} elevation={3}>
@@ -274,7 +203,9 @@ export default function App (): JSX.Element {
             </Paper>
             <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
             <p></p>
-            The position by which epidemics MUST occur are:
+            Split the remaining {totalPlayerCards - 5} cards into 5
+            piles of sizes {pileSizes.map(n => (n - 1)).join(', ')}. Add one <span style={{ color: 'red' }}>Epidemic</span>{' '}
+            card to each.
 
             <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
               Step 10: Player Order
@@ -296,13 +227,13 @@ export default function App (): JSX.Element {
                   '& ul': { padding: 0 }
                 }}
               >
-                <GameLog minWidth={60} parentState={setup} setParentState={setSetupWithTimestamp} gameLog={gameLog} setGameLog={setGameLogWithTimestamp} />
+                <GameLog minWidth={60} parentState={setup} setParentState={setSetupWithTimestamp} gameLog={gameLog} setGameLog={setGameLogWithTimestamp} showPositions/>
               </List>
             </Paper>
             <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
 
             <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Inferences </Typography>
-            <Inferences parentState={setup} gameLog={gameLog}></Inferences>
+            <Inferences parentState={setup} gameLog={gameLog} isDebug={isDebug}></Inferences>
 
             <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Glossary </Typography>
             <Glossary />
@@ -318,6 +249,7 @@ export default function App (): JSX.Element {
 
 function Glossary (): JSX.Element {
   return (<>
+    <MoreVertIcon />: End of a pile in the Player deck
     <ul>
       <li>
         <IndeterminateCheckBoxOutlinedIcon />: Not entered yet

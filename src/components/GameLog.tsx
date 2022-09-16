@@ -1,9 +1,11 @@
 import { Avatar, FormControl, ListItem, ListItemAvatar, ListItemText, ListSubheader, MenuItem, Select } from '@mui/material'
 import * as React from 'react'
-import { AllCities, infectionCardColor, playerCardIcon, PlayerCardTypes, TGameLog, TGameLogRow, TGameSetup, TPlayerCard } from '../types'
+import { AllCities, infectionCardColor, playerCardIcon, PlayerCardTypes, TGameLog, TGameLogRow, TGameSetup, TInfectionCard, TPlayerCard } from '../types'
+import { getPlayerDeckSetup } from '../utils'
 import { stringAvatar } from './DraggableAvatarStack'
 import InitialInfectionsLog from './InitialInfections'
 import InitialPlayerCardsLog from './InitialPlayerCards'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 
 interface GameLogProps {
   parentState: TGameSetup
@@ -11,33 +13,40 @@ interface GameLogProps {
   gameLog: TGameLog
   setGameLog: React.Dispatch<React.SetStateAction<TGameLog>>
   minWidth: number
+  showPositions: boolean
 }
 
-export default class GameLog extends React.Component<GameLogProps, {}> {
-  render (): React.ReactNode {
-    const players = this.props.parentState.players
-    const playerColors = this.props.parentState.playerColors
-    const history = this.props.gameLog
-    return (<>
-      <ListSubheader>Initial Infections</ListSubheader>
-      <InitialInfectionsLog parentState={this.props.parentState} setParentState={this.props.setParentState}></InitialInfectionsLog>
-      <ListSubheader>Initial Player Cards</ListSubheader>
-      <InitialPlayerCardsLog minWidth={this.props.minWidth} parentState={this.props.parentState} setParentState={this.props.setParentState}></InitialPlayerCardsLog>
-      {history.map((row, histIdx) => {
-        return (
-          <React.Fragment key={histIdx}>
-            {(histIdx % 4 === 0) && (<ListSubheader>Round {histIdx / 4 + 1}</ListSubheader>)}
-            <ListItem>
-              <ListItemAvatar>
-                <Avatar {...stringAvatar(players[row.playerId], playerColors[row.playerId])} />
-              </ListItemAvatar>
-              <ListItemText primary="drew" sx={{ color: 'blue' }} />
-              {row.playerCards.map((handCard, handCardIdx) => {
-                return (
+export default function GameLog (props: GameLogProps): JSX.Element {
+  const players = props.parentState.players
+  const playerColors = props.parentState.playerColors
+  const history = props.gameLog
+
+  const { pileTransitions } = getPlayerDeckSetup(props.parentState.fundingLevel)
+
+  return (<>
+    <ListSubheader>Initial Infections</ListSubheader>
+    <InitialInfectionsLog parentState={props.parentState} setParentState={props.setParentState}></InitialInfectionsLog>
+    <ListSubheader>Initial Player Cards</ListSubheader>
+    <InitialPlayerCardsLog minWidth={props.minWidth} parentState={props.parentState} setParentState={props.setParentState}></InitialPlayerCardsLog>
+    {history.map((row, histIdx) => {
+      return (
+        <React.Fragment key={histIdx}>
+          {(histIdx % 4 === 0) && (<ListSubheader>Round {histIdx / 4 + 1}</ListSubheader>)}
+          <ListItem>
+            <ListItemAvatar>
+              <Avatar {...stringAvatar(players[row.playerId], playerColors[row.playerId])} />
+            </ListItemAvatar>
+            <ListItemText primary="drew" sx={{ color: 'blue' }} />
+            {row.playerCards.map((handCard, handCardIdx) => {
+              return (
+                <React.Fragment key={handCardIdx}>
+                  <sub>
+                    {props.showPositions && (histIdx * 2 + handCardIdx)}
+                  </sub>
                   <FormControl
                     key={handCardIdx}
                     sx={{
-                      minWidth: this.props.minWidth,
+                      minWidth: props.minWidth,
                       alignItems: 'center',
                       '& .MuiOutlinedInput-notchedOutline': {
                         borderWidth: '0 !important'
@@ -46,7 +55,7 @@ export default class GameLog extends React.Component<GameLogProps, {}> {
                   ><Select
                     value={handCard}
                     onChange={(event) => {
-                      this.props.setGameLog(
+                      props.setGameLog(
                         history.map((oldRow, k) => {
                           if (k !== histIdx) {
                             return oldRow
@@ -73,49 +82,52 @@ export default class GameLog extends React.Component<GameLogProps, {}> {
                   >
                       {PlayerCardTypes.map((card, j) => {
                         return (
-                          <MenuItem key={j} value={card}>{playerCardIcon(card)}</MenuItem>)
+                          <MenuItem key={j} value={card}>
+                            {playerCardIcon(card)}
+                          </MenuItem>)
                       })}
                     </Select>
-                  </FormControl>)
-              })
-              }
-            </ListItem>
-            <ListItem>
-              <ListItemText inset
-                primary={'infected'}
-                sx={{ color: 'green' }} />
+                  </FormControl>
+                  {(pileTransitions.includes(histIdx * 2 + handCardIdx)) && <MoreVertIcon />}
+                </React.Fragment>)
+            })
+            }
+          </ListItem>
+          <ListItem>
+            <ListItemText inset
+              primary={'infected'}
+              sx={{ color: 'green' }} />
 
-              {row.infectionCards.map((card, j) => {
-                return (
-                  <FormControl key={j}>
-                    <Select
-                      value={card}
-                      sx={{ color: infectionCardColor(card) }}
-                      IconComponent={() => null}
-                      onChange={(event) => {
-                        this.props.setGameLog(
-                          history.map((oldRow, k) => {
-                            if (k !== histIdx) {
-                              return oldRow
-                            } else {
-                              const newRow = { ...oldRow }
-                              newRow.infectionCards = oldRow.infectionCards.map((oldCard, m) => (m === j ? event.target.value : oldCard))
-                              return newRow
-                            }
+            {row.infectionCards.map((card, j) => {
+              return (
+                <FormControl key={j}>
+                  <Select
+                    value={card}
+                    sx={{ color: infectionCardColor(card) }}
+                    IconComponent={() => null}
+                    onChange={(event) => {
+                      props.setGameLog(
+                        history.map((oldRow, k) => {
+                          if (k !== histIdx) {
+                            return oldRow
+                          } else {
+                            const newRow = { ...oldRow }
+                            newRow.infectionCards = oldRow.infectionCards.map((oldCard, m) => (m === j ? event.target.value as TInfectionCard : oldCard))
+                            return newRow
                           }
-                          )
+                        }
                         )
-                      }}
-                    >
-                      {AllCities.map((city, j) => {
-                        return (
-                          <MenuItem key={j} sx={{ color: infectionCardColor(city) }} value={city}>{city}</MenuItem>)
-                      })}
-                    </Select >
-                  </FormControl>)
-              })}
-            </ListItem>
-          </React.Fragment>)
-      })}</>)
-  }
+                      )
+                    }}
+                  >
+                    {AllCities.map((city, j) => {
+                      return (
+                        <MenuItem key={j} sx={{ color: infectionCardColor(city) }} value={city}>{city}</MenuItem>)
+                    })}
+                  </Select >
+                </FormControl>)
+            })}
+          </ListItem>
+        </React.Fragment>)
+    })}</>)
 }

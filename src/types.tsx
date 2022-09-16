@@ -124,7 +124,7 @@ export const AllCities = [
   ...BlackCities,
   ...YellowCities,
   ...RedCities
-]
+] as const
 
 export type TBlueInfectionCard = typeof BlueCities[number]
 export type TBlackInfectionCard = typeof BlackCities[number]

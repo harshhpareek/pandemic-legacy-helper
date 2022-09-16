@@ -1,6 +1,6 @@
 import { ListItem, ListItemText, FormControl, MenuItem, Select } from '@mui/material'
 import * as React from 'react'
-import { AllCities, infectionCardColor, TGameSetup } from '../types'
+import { AllCities, infectionCardColor, TGameSetup, TInfectionCard } from '../types'
 
 interface InitialInfectionsLogProps {
   parentState: TGameSetup
@@ -25,7 +25,7 @@ export default class InitialInfectionsLog extends React.Component<InitialInfecti
                   {
                     ...this.props.parentState,
                     initialInfections:
-                      infections.map((inf, k) => (k === i ? event.target.value : inf))
+                      infections.map((inf, k) => (k === i ? event.target.value as TInfectionCard : inf))
                   })
               }}
             >

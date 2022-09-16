@@ -1,99 +1,128 @@
 import { Alert } from '@mui/material'
 import * as React from 'react'
 import { playerCardIcon, PlayerCardTypes, TGameLog, TGameSetup, TInfectionCard, TPlayerCard } from '../types'
+import { EpidemicProbability, getPlayerDeckSetup } from '../utils'
 import InfectionCardChipStack from './InfectionCardChipStack'
 
 interface InferencesProps {
   parentState: TGameSetup
   gameLog: TGameLog
+  isDebug: boolean
 }
 
-export default class InitialInfectionsLog extends React.Component<InferencesProps, {}> {
-  numEpidemic: number = 0
-  epidemicPositions: number[] = []
-  alerts: string[] = []
-  playerCardCounts: Map<TPlayerCard, number> = new Map<TPlayerCard, number>()
-  allInfectionCards: Set<TInfectionCard> = new Set<TInfectionCard>()
-  pastInfectionCardStacks: TInfectionCard[][] = []
-  infectionCardsOnTop: TInfectionCard[] = []
+export default function Inferences (props: InferencesProps): JSX.Element {
+  const alerts: string[] = []
 
-  countPlayerCards (): void {
-    const counts = new Map<TPlayerCard, number>()
-    let playerDeckPosition: number = 0
-    this.props.parentState.initialPlayerCards.forEach(hand => {
-      hand.forEach(card => {
-        if (card === 'Epidemic') {
-          this.alerts.push('Epidemic cannot happen in initially dealt cards')
-        }
-        counts.set(card, (counts.get(card) ?? 0) + 1)
-      })
-    })
+  const epidemicPositions: number[] = []
+  const playerCardCounts: Map<TPlayerCard, number> = new Map<TPlayerCard, number>()
+  const allInfectionCards: Set<TInfectionCard> = new Set<TInfectionCard>()
+  const pastInfectionCardStacks: TInfectionCard[][] = []
 
-    this.props.gameLog.forEach(({ playerCards }) => {
-      playerCards.forEach(card => {
-        playerDeckPosition++
-        if (card === 'Epidemic') {
-          this.numEpidemic += 1
-          this.epidemicPositions.push(playerDeckPosition)
-        }
-        counts.set(card, (counts.get(card) ?? 0) + 1)
-      })
-    })
-    this.playerCardCounts = counts
-  }
+  const { totalPlayerCards, pileTransitions } = getPlayerDeckSetup(props.parentState.fundingLevel)
 
-  trackInfectionCards (): void {
-    this.infectionCardsOnTop = []
-    this.props.parentState.initialInfections.forEach(card => {
-      if (card === '_') {
-        return
+  let playerDeckPosition: number = 0
+  let pileNum: number = 0
+  let numEpidemics: number = 0
+  let infectionsDiscardPile: TInfectionCard[] = []
+  const upcomingInfectionCards: Set<TInfectionCard> = new Set<TInfectionCard>()
+
+  props.parentState.initialPlayerCards.forEach(hand => {
+    hand.forEach(card => {
+      if (card === 'Epidemic') {
+        alerts.push('Epidemic cannot happen in initially dealt cards')
       }
-      this.infectionCardsOnTop.push(card)
-      this.allInfectionCards.add(card)
+      playerCardCounts.set(card, (playerCardCounts.get(card) ?? 0) + 1)
     })
+  })
 
-    this.props.gameLog.forEach(({ playerCards, infectionCards }) => {
-      if (playerCards.includes('Epidemic')) {
-        // The cards drawn after epidemic
-        this.pastInfectionCardStacks.push(this.infectionCardsOnTop)
-        this.infectionCardsOnTop = []
+  props.parentState.initialInfections.forEach(card => {
+    if (allInfectionCards.has(card)) {
+      alerts.push(`Infection Card ${card} was repeated in Initial Infections`)
+    }
+    if (card !== '_') {
+      infectionsDiscardPile.push(card)
+      allInfectionCards.add(card)
+    }
+  })
+
+  function trackGameLog (): void {
+    let shouldBreak = false
+
+    for (const row of props.gameLog) {
+      const { playerCards, infectionCards } = row
+      if (shouldBreak) {
+        break
       }
-      infectionCards.forEach(card => {
+      for (const card of playerCards) {
         if (card === '_') {
-          return
+          shouldBreak = true
+          break
+        } else {
+          if (card === 'Epidemic') {
+            numEpidemics += 1
+            if (numEpidemics > pileNum + 1) {
+              alerts.push(`Epidemic ${numEpidemics} happened too early at position ${playerDeckPosition}. It can't happen until position ${pileTransitions[numEpidemics - 1]}`)
+            }
+            epidemicPositions.push(playerDeckPosition)
+          }
+          playerDeckPosition++
+          if (playerDeckPosition === pileTransitions[pileNum]) {
+            pileNum += 1
+          }
+          playerCardCounts.set(card, (playerCardCounts.get(card) ?? 0) + 1)
         }
-        this.infectionCardsOnTop.push(card)
-      })
-    })
+      }
+      if (shouldBreak) {
+        break
+      }
+
+      if (playerCards.includes('Epidemic')) {
+        pastInfectionCardStacks.push(infectionsDiscardPile)
+        infectionsDiscardPile.forEach(card => upcomingInfectionCards.add(card))
+        infectionsDiscardPile = []
+      }
+      for (const card of infectionCards) {
+        if (infectionsDiscardPile.includes(card)) {
+          alerts.push(`Infection card ${card} (before Position ${playerDeckPosition}) should already be in the discard pile`)
+        }
+        if (card !== '_') {
+          if (upcomingInfectionCards.size > 0 && !upcomingInfectionCards.has(card)) {
+            alerts.push(`${card} unexpected (Position ${playerDeckPosition}). ${upcomingInfectionCards.size} seen cards are still on top of the infection deck: ${Array.from(upcomingInfectionCards).join(', ')}`)
+          }
+          infectionsDiscardPile.push(card)
+          upcomingInfectionCards.delete(card)
+          allInfectionCards.add(card)
+        }
+      }
+    }
   }
 
-  render (): React.ReactNode {
-    this.numEpidemic = 0
-    this.alerts = []
+  trackGameLog()
 
-    this.countPlayerCards()
-    this.trackInfectionCards()
-    return (<>
-      {this.alerts.map((alert, i) => <Alert key={i} severity="error">{alert}</Alert>)}
-      <h4>On Pile: </h4>
-      <h4>Cards left in this pile: </h4>
-      <h4>Probability of Epidemic in next 2 cards: </h4>
-      <h4>Infection Cards on Top</h4>
-      <InfectionCardChipStack cards={this.infectionCardsOnTop} />
-      <h4>Upcoming Infection Cards</h4>
-      <InfectionCardChipStack cards={Array.from(this.allInfectionCards).filter(card => !this.infectionCardsOnTop.includes(card))} />
-      <h4> Past Summary: Infection Cards</h4>
-      {this.pastInfectionCardStacks.map((stack, j) =>
-        <div key={j}>
-          <h5 key={j}>Before Epidemic {j + 1}:</h5>
-          <InfectionCardChipStack cards={stack} />
-        </div>)}
-      <p></p>
-      <h4>Player Card counts</h4>
-      <ul>
-        {PlayerCardTypes.map((cardType, i) =>
-          <li key={i}>{playerCardIcon(cardType)}: {this.playerCardCounts.get(cardType) ?? 0}</li>)}
-      </ul>
-    </>)
+  if (playerDeckPosition > totalPlayerCards) {
+    alerts.push(`Player Deck Position ${playerDeckPosition} is greater than total cards ${totalPlayerCards}`)
   }
+
+  return (<>
+    {alerts.map((alert, i) => <Alert key={i} severity="error">{alert}</Alert>)}
+    <span style={numEpidemics > pileNum ? { color: 'green' } : {}}> Probability of next card being Epidemic: {numEpidemics > pileNum ? 0 : EpidemicProbability(pileTransitions[pileNum] - playerDeckPosition)}%</span>
+    <h4>Infection discard pile</h4>
+    <InfectionCardChipStack cards={infectionsDiscardPile} />
+    <h4>Upcoming Infection Cards</h4>
+    <InfectionCardChipStack cards={Array.from(upcomingInfectionCards)} />
+    {props.isDebug && (<><h4> Current position: {playerDeckPosition}. Pile {pileNum}. Cards left in this pile: {pileTransitions[pileNum] - playerDeckPosition}</h4>
+    Epidemics so far: {numEpidemics} at positions [{epidemicPositions.join(',')}], expected by {pileTransitions.join(', ')}</>)}
+    <h4> Past Summary: Infection Cards</h4>
+    {pastInfectionCardStacks.map((stack, j) =>
+      <div key={j}>
+        <h5 key={j}>Before Epidemic {j + 1}:</h5>
+        <InfectionCardChipStack cards={stack} />
+      </div>)}
+    <p></p>
+    <h4>Player Card counts</h4>
+    <ul>
+      {PlayerCardTypes.map((cardType, i) =>
+        <li key={i}>{playerCardIcon(cardType)}: {playerCardCounts.get(cardType) ?? 0}</li>)}
+    </ul>
+  </>)
 }
