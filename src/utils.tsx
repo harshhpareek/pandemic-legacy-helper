@@ -38,14 +38,14 @@ export function getPlayerDeckSetup (fundingLevel: number): {
 }
 
 export function genGameLog (fundingLevel: number, positionToPlayerId: number[], oldGameLog?: TGameLog): TGameLog {
-  const { totalPlayerCards, pileTransitions } = getPlayerDeckSetup(fundingLevel)
+  const { totalPlayerCards } = getPlayerDeckSetup(fundingLevel)
 
   const numRounds = Math.ceil(totalPlayerCards / 2)
   // const oldHistory = [...this.state.history]
   const generatedGameLog = new Array(numRounds).fill(null).map((_, n) => {
-    // TODO:make sure this is always right
-    const numInfCards = numInfectionCards(
-      pileNum(pileTransitions, n * 2))
+    // TODO: Finetune this
+    // const numInfCards = numInfectionCards(pileNum(pileTransitions, n * 2))
+    const numInfCards = 4
 
     const getPlayerCards = (): TPlayerCard[] => {
       if (n === numRounds - 1 && totalPlayerCards % 2 === 1) {

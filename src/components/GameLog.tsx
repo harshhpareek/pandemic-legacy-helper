@@ -94,9 +94,9 @@ export default function GameLog (props: GameLogProps): JSX.Element {
             }
           </ListItem>
           <ListItem>
-            <ListItemText inset
+            {/* <ListItemText inset
               primary={'infected'}
-              sx={{ color: 'green' }} />
+              sx={{ color: 'green' }} /> */}
 
             {row.infectionCards.map((card, j) => {
               return (
