@@ -93,10 +93,48 @@ export default function GameLog (props: GameLogProps): JSX.Element {
             })
             }
           </ListItem>
+          {row.playerCards.includes('Epidemic') && (
+            <>
+              <ListItem>
+                <ListItemText inset> <b>Increase</b> num infections to 2 </ListItemText>
+              </ListItem>
+              <ListItem>
+                <ListItemText inset><b>Infect</b> city:</ListItemText>
+                <FormControl>
+                  <Select
+                    value={row.epidemicInfectStepCard}
+                    sx={{ color: infectionCardColor(row.epidemicInfectStepCard) }}
+                    IconComponent={() => null}
+                    onChange={(event) => {
+                      props.setGameLog(
+                        history.map((oldRow, k) => {
+                          if (k !== histIdx) {
+                            return oldRow
+                          } else {
+                            const newRow = { ...oldRow }
+                            newRow.epidemicInfectStepCard = event.target.value as TInfectionCard
+                            return newRow
+                          }
+                        }
+                        )
+                      )
+                    }}
+                  >
+                    {AllCities.map((city, j) => {
+                      return (
+                        <MenuItem key={j} sx={{ color: infectionCardColor(city) }} value={city}>{city}</MenuItem>)
+                    })}
+                  </Select>
+                </FormControl>
+              </ListItem>
+              <ListItem><ListItemText inset><b>Intensify</b>: Cities go back on the stack
+              </ListItemText> </ListItem>
+            </>)
+          }
           <ListItem>
-            {/* <ListItemText inset
+            <ListItemText inset
               primary={'infected'}
-              sx={{ color: 'green' }} /> */}
+              sx={{ color: 'green' }} />
 
             {row.infectionCards.map((card, j) => {
               return (
@@ -128,6 +166,7 @@ export default function GameLog (props: GameLogProps): JSX.Element {
                 </FormControl>)
             })}
           </ListItem>
+
         </React.Fragment>)
     })}</>)
 }

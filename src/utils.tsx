@@ -64,11 +64,13 @@ export function genGameLog (fundingLevel: number, positionToPlayerId: number[], 
       (card, m) =>
         ((oldGameLog != null) && n < oldGameLog.length && m < oldGameLog[n].infectionCards.length) ? oldGameLog[n].infectionCards[m] : card
     )
+    const epidemicInfectStepCard = (oldGameLog === null || oldGameLog === undefined || oldGameLog.length < n) ? '_' : (oldGameLog[n].epidemicInfectStepCard ?? '_')
 
     const newGameLogRow: TGameLogRow = {
       playerId: positionToPlayerId[n % 4],
       playerCards,
-      infectionCards
+      infectionCards,
+      epidemicInfectStepCard
     }
     return newGameLogRow
   })

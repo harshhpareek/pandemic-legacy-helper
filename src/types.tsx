@@ -22,6 +22,7 @@ export interface TGameLogRow {
   playerId: number
   playerCards: TPlayerCard[]
   infectionCards: TInfectionCard[]
+  epidemicInfectStepCard: TInfectionCard
 }
 
 export type TGameLog = TGameLogRow[]
@@ -30,7 +31,8 @@ export function newHistoryRow (playerId: number): TGameLogRow {
   return {
     playerId,
     playerCards: ['_', '_'],
-    infectionCards: ['_', '_']
+    infectionCards: ['_', '_'],
+    epidemicInfectStepCard: '_'
   }
 }
 

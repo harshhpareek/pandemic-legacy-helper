@@ -49,7 +49,7 @@ export default function Inferences (props: InferencesProps): JSX.Element {
     let shouldBreak = false
 
     for (const row of props.gameLog) {
-      const { playerCards, infectionCards } = row
+      const { playerCards, infectionCards, epidemicInfectStepCard } = row
       if (shouldBreak) {
         break
       }
@@ -77,6 +77,7 @@ export default function Inferences (props: InferencesProps): JSX.Element {
       }
 
       if (playerCards.includes('Epidemic')) {
+        infectionsDiscardPile.push(epidemicInfectStepCard)
         pastInfectionCardStacks.push(infectionsDiscardPile)
         infectionsDiscardPile.forEach(card => upcomingInfectionCards.add(card))
         infectionsDiscardPile = []
