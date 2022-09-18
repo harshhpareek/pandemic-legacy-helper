@@ -1,11 +1,12 @@
 import { Avatar, FormControl, ListItem, ListItemAvatar, ListItemText, ListSubheader, MenuItem, Select } from '@mui/material'
 import * as React from 'react'
-import { AllCities, infectionCardColor, playerCardIcon, PlayerCardTypes, TGameLog, TGameLogRow, TGameSetup, TInfectionCard, TPlayerCard } from '../types'
+import { AllCities, infectionCardColor, playerCardIcon, PlayerCardTypes, TGameLog, TGameSetup, TInfectionCard, TPlayerCard } from '../types'
 import { getPlayerDeckSetup } from '../utils'
 import { stringAvatar } from './DraggableAvatarStack'
 import InitialInfectionsLog from './InitialInfections'
 import InitialPlayerCardsLog from './InitialPlayerCards'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
+import InfectionCardChipStack from './InfectionCardChipStack'
 
 interface GameLogProps {
   parentState: TGameSetup
@@ -55,22 +56,9 @@ export default function GameLog (props: GameLogProps): JSX.Element {
                   ><Select
                     value={handCard}
                     onChange={(event) => {
-                      props.setGameLog(
-                        history.map((oldRow, k) => {
-                          if (k !== histIdx) {
-                            return oldRow
-                          } else {
-                            const newRow: TGameLogRow = { ...oldRow }
-                            newRow.playerCards = oldRow.playerCards.map(
-                              (oldCard, m) => (
-                                m === handCardIdx
-                                  ? (event.target.value as TPlayerCard)
-                                  : oldCard))
-                            return newRow
-                          }
-                        }
-                        )
-                      )
+                      const newHistory = history
+                      newHistory[histIdx].playerCards[handCardIdx] = event.target.value as TPlayerCard
+                      props.setGameLog(newHistory)
                     }}
                     IconComponent={() => null}
                     inputProps={
@@ -131,6 +119,12 @@ export default function GameLog (props: GameLogProps): JSX.Element {
               </ListItemText> </ListItem>
             </>)
           }
+          <ListItem>
+            <ListItemText inset
+              primary={'infected'}
+              sx={{ color: 'green' }} />
+              <InfectionCardChipStack cards={row.infectionCards} />
+          </ListItem>
           <ListItem>
             <ListItemText inset
               primary={'infected'}
