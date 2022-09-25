@@ -28,11 +28,12 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
   constructor (props: TAvatarProps) {
     super(props)
     this.onDragEnd = this.onDragEnd.bind(this)
+    this.newPlayerId = this.newPlayerId.bind(this)
   }
 
   newPlayerId (position: number, sourceIdx: number, destinationIdx: number, oldPositionToPlayerId: number[], playerId: number): number {
     if (position === destinationIdx) {
-      return oldPositionToPlayerId[destinationIdx]
+      return oldPositionToPlayerId[sourceIdx]
     }
     if ((position < sourceIdx && position < destinationIdx) || (position > sourceIdx && position > destinationIdx)) {
       return playerId
@@ -50,8 +51,7 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
   onDragEnd ({ destination, source }: DropResult): void { // dropped outside the list
     if (destination === undefined || destination === null) { return }
     const oldPositionToPlayerId = this.props.parentState.positionToPlayerId
-    const newPositionToPlayerId = oldPositionToPlayerId.map((playerId, position) =>
-      this.newPlayerId(position, source.index, destination.index, oldPositionToPlayerId, playerId))
+    const newPositionToPlayerId = oldPositionToPlayerId.map((playerId, position) => { return this.newPlayerId(position, source.index, destination.index, oldPositionToPlayerId, playerId) })
     this.props.setParentState({
       ...this.props.parentState,
       positionToPlayerId: newPositionToPlayerId
@@ -64,46 +64,47 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
     const playerColors = this.props.parentState.playerColors
     const positionToPlayerId = this.props.parentState.positionToPlayerId
     return (
-      <DragDropContext onDragEnd={this.onDragEnd}>
-        <Droppable droppableId="avatars" direction="horizontal">
-          {(provided, snapshot) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-            >
-              <Stack direction="row" spacing={2}>
-                {positionToPlayerId.map((playerId, position) => {
-                  const [showNameDialog, setShowNameDialog] = React.useState(false)
-                  return (
-                    <Draggable key={playerId} draggableId={String(playerId)} index={position}>
-                      {(provided, snapshot) => (
-                        <div
-                          ref={provided.innerRef}
-                          {...provided.draggableProps}
-                          {...provided.dragHandleProps}
-                        >
-                          <NameDialog
-                            show={showNameDialog}
-                            name={players[playerId]}
-                            color={playerColors[playerId]}
-                            onClose={() => { setShowNameDialog(false) }}
-                            onChangeName={(name: string) => {
-                              this.props.setParentState(update(this.props.parentState, { players: { [playerId]: { $set: name } } }))
-                            }}
-                            onChangeColor={(color: TPawnColor) => {
-                              this.props.setParentState(update(this.props.parentState, { playerColors: { [playerId]: { $set: color } } }))
-                            }} />
-                          <Avatar component={Paper} elevation={5} {...stringAvatar(players[playerId], playerColors[playerId])} onClick={() => { setShowNameDialog(true) }} />
-                        </div>)}
-                    </Draggable>)
-                })}
-              </Stack>
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
-
+      <div style={{ overflow: 'hidden', height: 75 }}>
+        <DragDropContext onDragEnd={this.onDragEnd}>
+          <Droppable droppableId="avatars" direction="horizontal">
+            {(provided, snapshot) => (
+              <div
+                ref={provided.innerRef}
+                {...provided.droppableProps}
+              >
+                <Stack direction="row" spacing={2} margin={2}>
+                  {positionToPlayerId.map((playerId, position) => {
+                    const [showNameDialog, setShowNameDialog] = React.useState(false)
+                    return (
+                      <Draggable key={playerId} draggableId={String(playerId)} index={position}>
+                        {(provided, snapshot) => (
+                          <div
+                            ref={provided.innerRef}
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                          >
+                            <NameDialog
+                              show={showNameDialog}
+                              name={players[playerId]}
+                              color={playerColors[playerId]}
+                              onClose={() => { setShowNameDialog(false) }}
+                              onChangeName={(name: string) => {
+                                this.props.setParentState(update(this.props.parentState, { players: { [playerId]: { $set: name } } }))
+                              }}
+                              onChangeColor={(color: TPawnColor) => {
+                                this.props.setParentState(update(this.props.parentState, { playerColors: { [playerId]: { $set: color } } }))
+                              }} />
+                            <Avatar component={Paper} elevation={5} {...stringAvatar(players[playerId], playerColors[playerId])} onClick={() => { setShowNameDialog(true) }} />
+                          </div>)}
+                      </Draggable>)
+                  })}
+                </Stack>
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
+        </DragDropContext>
+      </div>
     )
   }
 }
