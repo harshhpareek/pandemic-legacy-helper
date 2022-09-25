@@ -100,8 +100,8 @@ export default function App (): JSX.Element {
   return (
     <Container>
       <Box>
-        <TextField disabled={isLoaded} label="Game Code" value={key} onChange={(event) => setKey(event.target.value)} />
-        <TextField disabled={isLoaded} label="User" value={user} onChange={(event) => setUser(event.target.value)} />
+        <TextField disabled={isLoaded} label="Game Code" value={key} onChange={(event) => setKey(event.target.value.trim())} />
+        <TextField disabled={isLoaded} label="User" value={user} onChange={(event) => setUser(event.target.value.trim())} />
         <Button onClick={() => {
           if (key === '' || user === '') {
             alert('Enter something pls fren')
@@ -260,14 +260,9 @@ function Debug ({ setup, setSetup, gameLog, setGameLog }: TDebugProps): JSX.Elem
         setGameLog(newGameLog)
       }}>Load Test State</Button>
 
-      <Button onClick={() => {
-        setDebugTextArea(JSON.stringify(setup, null, 2))
-      }}>
-        Dump state to Text Area</Button>
-      <Button onClick={() => {
-        setSetup(JSON.parse(debugTextArea))
-      }}>Set state (dangerously) from Text Area</Button>
-
+      <Button onClick={() => { setDebugTextArea(JSON.stringify(setup, null, 2)) }}>
+        Dump state to Text Area
+      </Button>
       <TextareaAutosize
         minRows={5}
         style={{ width: '100%' }}
@@ -277,6 +272,10 @@ function Debug ({ setup, setSetup, gameLog, setGameLog }: TDebugProps): JSX.Elem
             event.target.value)
         }
       />
+      <Button onClick={() => { setSetup(JSON.parse(debugTextArea)) }}>
+        Set state (dangerously) from Text Area
+      </Button>
+
     </>
   )
 }
