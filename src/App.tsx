@@ -1,5 +1,3 @@
-import MoreVertIcon from '@mui/icons-material/MoreVert'
-import IndeterminateCheckBoxOutlinedIcon from '@mui/icons-material/IndeterminateCheckBoxOutlined'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Container from '@mui/material/Container'
@@ -16,27 +14,15 @@ import GameLog from './components/GameLog'
 import Inferences from './components/Inferences'
 import InitialInfectionsLog from './components/InitialInfections'
 import InitialPlayerCardsLog from './components/InitialPlayerCards'
-import { playerCardIcon, TGameSetup, TGameLog } from './types'
-import { initializeApp } from 'firebase/app'
+import { TGameSetup, TGameLog } from './types'
 import { genGameLog, getPlayerDeckSetup } from './utils'
-import { getDatabase, ref, set, child, get, onValue } from 'firebase/database'
+
 import LastUpdatedText from './components/LastUpdatedText'
 import Divider from '@mui/material/Divider'
+import { firebaseManualGet, firebaseStateUpdate, firebaseWrite } from './helpers/firebase_helpers'
+import { Glossary } from './components/Glossary'
 
 export default function App (): JSX.Element {
-  const firebaseConfig = {
-    apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-    authDomain: 'pandemic-legacy-helper.firebaseapp.com',
-    projectId: 'pandemic-legacy-helper',
-    storageBucket: 'pandemic-legacy-helper.appspot.com',
-    messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.REACT_APP_FIREBASE_APP_ID,
-    measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID,
-    databaseURL: 'https://pandemic-legacy-helper-default-rtdb.firebaseio.com/'
-  }
-  const app = initializeApp(firebaseConfig)
-  const db = getDatabase(app)
-
   const [key, setKey] = useState('')
   const [user, setUser] = useState('')
   const [isLoaded, setIsLoaded] = useState(false)
@@ -69,30 +55,12 @@ export default function App (): JSX.Element {
   React.useEffect(() => {
     // Write state only if there is a user-generated change
     if (timestamp > 0 && timestamp > lastUpdatedTimestamp) {
-      set(ref(db, 'state/' + key), { setup, gameLog, user, timestamp }).then((value) => {
-        console.log('Write succeeded! for', timestamp)
-      }).catch((reason) => {
-        alert('Write failed! ' + JSON.stringify(reason))
-      })
+      firebaseWrite(key, setup, gameLog, user, timestamp)
     }
   }, [setup, gameLog])
 
   React.useEffect(() => {
-    onValue(ref(db, 'state/' + key), (snapshot) => {
-      if (snapshot.exists()) {
-        if (snapshot.val().user !== null && snapshot.val().user !== undefined) {
-          if (snapshot.val().user !== lastUpdatedByUser && snapshot.val().timestamp !== lastUpdatedTimestamp) {
-            console.log('Updating state to ' + String(snapshot.val().user) + 'at ' + String(snapshot.val().timestamp))
-            setSetup(snapshot.val().setup)
-            setGameLog(snapshot.val().gameLog)
-            setLastUpdatedByUser(snapshot.val().user)
-            setLastUpdatedTimestamp(snapshot.val().timestamp)
-          }
-        }
-      } else {
-        alert('Database read called without a snapshot')
-      }
-    })
+    firebaseStateUpdate(key, lastUpdatedByUser, lastUpdatedTimestamp, setSetup, setGameLog, setLastUpdatedByUser, setLastUpdatedTimestamp)
   }, [lastUpdatedTimestamp])
 
   const { totalPlayerCards, pileSizes } = getPlayerDeckSetup(setup.fundingLevel)
@@ -106,25 +74,7 @@ export default function App (): JSX.Element {
           if (key === '' || user === '') {
             alert('Enter something pls fren')
           } else {
-            get(child(ref(db), `state/${key}`)).then((snapshot) => {
-              if (snapshot.exists()) {
-                const loadedSetup: TGameSetup = snapshot.val().setup
-                setSetup(loadedSetup)
-                const loadedGameLog: TGameLog = snapshot.val().gameLog
-                setGameLog(loadedGameLog)
-                const lastUpdatedByUser: string = snapshot.val().user
-                setLastUpdatedByUser(lastUpdatedByUser)
-                const lastUpdatedTimestamp: number = snapshot.val().timestamp
-                setLastUpdatedTimestamp(lastUpdatedTimestamp)
-              } else {
-                // This is a new game. This is fine. A new key will be uploaded on next user interaction.
-              }
-              // XXX: Should actually be set true after setState is finished, but its probably not going to be noticeable
-              setIsLoaded(true)
-            }).catch((error) => {
-              alert(error)
-              console.error(error)
-            })
+            firebaseManualGet(key, setSetup, setGameLog, setLastUpdatedByUser, setLastUpdatedTimestamp, setIsLoaded)
           }
         }}>Connect</Button>
         <T></T>
@@ -206,22 +156,6 @@ export default function App (): JSX.Element {
   )
 }
 
-function Glossary (): JSX.Element {
-  return (<>
-    <ul>
-      <li> <MoreVertIcon />: End of a pile in the Player deck </li>
-      <li>
-        <IndeterminateCheckBoxOutlinedIcon />: Not entered yet
-      </li>
-      <li>{playerCardIcon('Epidemic')}: Epidemic</li>
-      <li>{playerCardIcon('Black')}: Black city player card</li>
-      <li>{playerCardIcon('Yellow')}: Yellow city player card</li>
-      <li>{playerCardIcon('Blue')}: Blue city player card</li>
-      <li>{playerCardIcon('Red')}: Red city player card</li>
-      <li>{playerCardIcon('Funded')}: Funded event</li>
-    </ul></>)
-}
-
 interface TDebugProps {
   setup: TGameSetup
   setSetup: React.Dispatch<React.SetStateAction<TGameSetup>>
@@ -267,10 +201,7 @@ function Debug ({ setup, setSetup, gameLog, setGameLog }: TDebugProps): JSX.Elem
         minRows={5}
         style={{ width: '100%' }}
         value={debugTextArea}
-        onChange={(event) =>
-          setDebugTextArea(
-            event.target.value)
-        }
+        onChange={(event) => setDebugTextArea(event.target.value)}
       />
       <Button onClick={() => { setSetup(JSON.parse(debugTextArea)) }}>
         Set state (dangerously) from Text Area
