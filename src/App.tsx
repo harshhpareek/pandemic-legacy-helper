@@ -96,10 +96,9 @@ export default function App (): JSX.Element {
 
   const { totalPlayerCards, pileSizes } = getPlayerDeckSetup(setup.fundingLevel)
 
-  // iPhone X dimensions are 375x812 px
   return (
     <Container>
-      <Box sx={{ maxWidth: 370 }}>
+      <Box>
         <p></p>
         <TextField disabled={isLoaded} label="Game Code" value={key} onChange={(event) => setKey(event.target.value)} />
         <p></p>
@@ -149,14 +148,8 @@ export default function App (): JSX.Element {
             <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
               Step 4: Infect 9 cities
             </Typography>
-            <Paper sx={{ maxWidth: 360 }} elevation={3}>
-              <List sx={{
-                maxWidth: 360,
-                position: 'relative',
-                overflow: 'auto',
-                maxHeight: 400,
-                '& ul': { padding: 0 }
-              }}>
+            <Paper>
+              <List>
                 <InitialInfectionsLog parentState={setup} setParentState={setSetupWithTimestamp}></InitialInfectionsLog>
               </List>
             </Paper>
@@ -189,15 +182,8 @@ export default function App (): JSX.Element {
             Adding funded events, you should have <b>{48 + setup.fundingLevel} </b> player cards (= funding level + 48 city cards, 12 of each color). Deal two cards to each player. (This page assumes 4 players)
             <p></p>
             Cards dealt:
-            <Paper sx={{ maxWidth: 360 }} elevation={3}>
-              <List
-                sx={{
-                  maxWidth: 360,
-                  position: 'relative',
-                  overflow: 'auto',
-                  '& ul': { padding: 0 }
-                }}
-              >
+            <Paper>
+              <List>
                 <InitialPlayerCardsLog minWidth={60} parentState={setup} setParentState={setSetupWithTimestamp}></InitialPlayerCardsLog>
               </List>
             </Paper>
@@ -217,16 +203,8 @@ export default function App (): JSX.Element {
             ))} />
 
             <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>Game Log</Typography>
-            <Paper sx={{ maxWidth: 360 }} elevation={3}>
-              <List dense
-                sx={{
-                  maxWidth: 360,
-                  position: 'relative',
-                  overflow: 'auto',
-                  maxHeight: 400,
-                  '& ul': { padding: 0 }
-                }}
-              >
+            <Paper>
+              <List>
                 <GameLog minWidth={60} parentState={setup} setParentState={setSetupWithTimestamp} gameLog={gameLog} setGameLog={setGameLogWithTimestamp} showPositions/>
               </List>
             </Paper>
