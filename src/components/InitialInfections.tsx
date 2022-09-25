@@ -1,6 +1,7 @@
 import { ListItem, ListItemText, FormControl, MenuItem, Select } from '@mui/material'
 import * as React from 'react'
 import { AllCities, infectionCardColor, TGameSetup, TInfectionCard } from '../types'
+import update from 'immutability-helper'
 
 interface InitialInfectionsLogProps {
   parentState: TGameSetup
@@ -10,6 +11,7 @@ interface InitialInfectionsLogProps {
 export default class InitialInfectionsLog extends React.Component<InitialInfectionsLogProps, {}> {
   render (): React.ReactNode {
     const infections = this.props.parentState.initialInfections
+    console.log(this.props.parentState)
     return <>
       {infections.map((card, i) => {
         return (<ListItem key={i}>
@@ -21,12 +23,17 @@ export default class InitialInfectionsLog extends React.Component<InitialInfecti
               value={card}
               sx={{ color: infectionCardColor(card) }}
               onChange={(event) => {
+                console.log(this.props.parentState)
                 this.props.setParentState(
-                  {
-                    ...this.props.parentState,
-                    initialInfections:
-                      infections.map((inf, k) => (k === i ? event.target.value as TInfectionCard : inf))
-                  })
+                  update(
+                    this.props.parentState,
+                    {
+                      initialInfections:
+                      {
+                        [i]:
+                          { $set: event.target.value as TInfectionCard }
+                      }
+                    }))
               }}
             >
               {AllCities.map((city, j) => {

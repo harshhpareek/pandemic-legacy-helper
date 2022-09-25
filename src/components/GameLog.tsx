@@ -7,6 +7,7 @@ import InitialInfectionsLog from './InitialInfections'
 import InitialPlayerCardsLog from './InitialPlayerCards'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
 import InfectionCardChipStack from './InfectionCardChipStack'
+import update from 'immutability-helper'
 
 interface GameLogProps {
   parentState: TGameSetup
@@ -56,9 +57,7 @@ export default function GameLog (props: GameLogProps): JSX.Element {
                   ><Select
                     value={handCard}
                     onChange={(event) => {
-                      const newHistory = history
-                      newHistory[histIdx].playerCards[handCardIdx] = event.target.value as TPlayerCard
-                      props.setGameLog(newHistory)
+                      props.setGameLog(update(history, { [histIdx]: { playerCards: { [handCardIdx]: { $set: event.target.value as TPlayerCard } } } }))
                     }}
                     IconComponent={() => null}
                     inputProps={
@@ -94,18 +93,11 @@ export default function GameLog (props: GameLogProps): JSX.Element {
                     sx={{ color: infectionCardColor(row.epidemicInfectStepCard) }}
                     IconComponent={() => null}
                     onChange={(event) => {
-                      props.setGameLog(
-                        history.map((oldRow, k) => {
-                          if (k !== histIdx) {
-                            return oldRow
-                          } else {
-                            const newRow = { ...oldRow }
-                            newRow.epidemicInfectStepCard = event.target.value as TInfectionCard
-                            return newRow
-                          }
-                        }
-                        )
-                      )
+                      props.setGameLog(update(
+                        history, {
+                          [histIdx]:
+                          { epidemicInfectStepCard: { $set: event.target.value as TInfectionCard } }
+                        }))
                     }}
                   >
                     {AllCities.map((city, j) => {
@@ -123,7 +115,7 @@ export default function GameLog (props: GameLogProps): JSX.Element {
             <ListItemText inset
               primary={'infected'}
               sx={{ color: 'green' }} />
-              <InfectionCardChipStack cards={row.infectionCards} />
+            <InfectionCardChipStack cards={row.infectionCards} />
           </ListItem>
           <ListItem>
             <ListItemText inset
@@ -139,17 +131,16 @@ export default function GameLog (props: GameLogProps): JSX.Element {
                     IconComponent={() => null}
                     onChange={(event) => {
                       props.setGameLog(
-                        history.map((oldRow, k) => {
-                          if (k !== histIdx) {
-                            return oldRow
-                          } else {
-                            const newRow = { ...oldRow }
-                            newRow.infectionCards = oldRow.infectionCards.map((oldCard, m) => (m === j ? event.target.value as TInfectionCard : oldCard))
-                            return newRow
+                        update(
+                          history, {
+                            [histIdx]:
+                          {
+                            infectionCards:
+                            {
+                              [j]: { $set: event.target.value as TInfectionCard }
+                            }
                           }
-                        }
-                        )
-                      )
+                          }))
                     }}
                   >
                     {AllCities.map((city, j) => {

@@ -101,9 +101,9 @@ export default function App (): JSX.Element {
     <Container>
       <Box sx={{ maxWidth: 370 }}>
         <p></p>
-        <TextField label="Game Code" value={key} onChange={(event) => setKey(event.target.value)} />
+        <TextField disabled={isLoaded} label="Game Code" value={key} onChange={(event) => setKey(event.target.value)} />
         <p></p>
-        <TextField label="User" value={user} onChange={(event) => setUser(event.target.value)} />
+        <TextField disabled={isLoaded} label="User" value={user} onChange={(event) => setUser(event.target.value)} />
         <p></p>
         <Button variant="contained" onClick={() => {
           if (key === '' || user === '') {

@@ -2,6 +2,7 @@ import { Avatar, FormControl, ListItem, ListItemAvatar, ListItemText, MenuItem, 
 import * as React from 'react'
 import { playerCardIcon, PlayerCardTypes, TGameSetup, TPlayerCard } from '../types'
 import { stringAvatar } from './DraggableAvatarStack'
+import update from 'immutability-helper'
 
 interface InitialPlayerCardsLogProps {
   parentState: TGameSetup
@@ -38,15 +39,17 @@ export default class InitialPlayerCardsLog extends React.Component<InitialPlayer
               value={handCard}
               onChange={(event) => {
                 const newCard = event.target.value as TPlayerCard
+                const hand = this.props.parentState.initialPlayerCards[playerId]
                 this.props.setParentState(
-                  {
-                    ...this.props.parentState,
-                    initialPlayerCards:
-                      initialPlayerCards.map((hand, k) =>
-                        (k === playerId
-                          ? (handCardIdx === 0 ? [newCard, hand[1]] : [hand[0], newCard])
-                          : hand))
-                  })
+                  update(this.props.parentState,
+                    {
+                      initialPlayerCards: {
+                        [playerId]: {
+                          $set: handCardIdx === 0 ? [newCard, hand[1]] : [hand[0], newCard]
+                        }
+                      }
+                    }
+                  ))
               }}
               IconComponent={() => null}
               inputProps={
@@ -65,6 +68,7 @@ export default class InitialPlayerCardsLog extends React.Component<InitialPlayer
         })
         }
       </ListItem>)
-    })}</>)
+    })
+    }</>)
   }
 }
