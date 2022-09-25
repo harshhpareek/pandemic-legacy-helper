@@ -27,14 +27,11 @@ export default function NameDialog (props: NameDialogProps): JSX.Element {
       <DialogContent>
         <TextField
           label="Initials"
-          variant="standard"
-          size="small"
           value={props.name}
           onChange={(event) =>
             props.onChangeName(event.target.value)
           }
         />
-        <p></p>
         <FormControl>
           <InputLabel>Color</InputLabel>
           <Select

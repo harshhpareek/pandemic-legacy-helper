@@ -1,3 +1,4 @@
+import Typography from '@mui/material/Typography'
 import * as React from 'react'
 
 interface TLastUpdatedTextProps {
@@ -6,7 +7,8 @@ interface TLastUpdatedTextProps {
 }
 
 export default function LastUpdatedText (props: TLastUpdatedTextProps): JSX.Element {
-  return <p><small><i>
-        Last updated by: {props.lastUpdatedByUser} at {props.lastUpdatedTimestamp > 0 ? (new Date(props.lastUpdatedTimestamp)).toLocaleString() : ''}
-    </i></small></p>
+  return (
+  <Typography sx={{ fontStyle: 'italic', m: 1 }} variant="caption" >
+    Last updated by: {props.lastUpdatedByUser} at {props.lastUpdatedTimestamp > 0 ? (new Date(props.lastUpdatedTimestamp)).toLocaleString() : ''}
+  </Typography>)
 }

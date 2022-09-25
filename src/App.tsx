@@ -8,7 +8,7 @@ import List from '@mui/material/List'
 import Paper from '@mui/material/Paper'
 import TextareaAutosize from '@mui/material/TextareaAutosize'
 import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
+import { Typography as T } from '@mui/material'
 import * as React from 'react'
 import { useState } from 'react'
 import DraggableAvatarStack from './components/DraggableAvatarStack'
@@ -21,6 +21,7 @@ import { initializeApp } from 'firebase/app'
 import { genGameLog, getPlayerDeckSetup } from './utils'
 import { getDatabase, ref, set, child, get, onValue } from 'firebase/database'
 import LastUpdatedText from './components/LastUpdatedText'
+import Divider from '@mui/material/Divider'
 
 export default function App (): JSX.Element {
   const firebaseConfig = {
@@ -99,12 +100,9 @@ export default function App (): JSX.Element {
   return (
     <Container>
       <Box>
-        <p></p>
         <TextField disabled={isLoaded} label="Game Code" value={key} onChange={(event) => setKey(event.target.value)} />
-        <p></p>
         <TextField disabled={isLoaded} label="User" value={user} onChange={(event) => setUser(event.target.value)} />
-        <p></p>
-        <Button variant="contained" onClick={() => {
+        <Button onClick={() => {
           if (key === '' || user === '') {
             alert('Enter something pls fren')
           } else {
@@ -129,25 +127,30 @@ export default function App (): JSX.Element {
             })
           }
         }}>Connect</Button>
+        <T></T>
         <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
 
+        <Divider variant="middle" sx={{ mt: 2 }}/>
+
         {isLoaded &&
-          (<><Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
+          (<><T variant="h5">
             Players:
-          </Typography>
+          </T>
+
+            <h5>Players:
+            </h5>
             <DraggableAvatarStack parentState={setup} setParentState={setSetupWithTimestamp} regenGameLog={(newPositionToPlayerId: number[]) => setGameLog(genGameLog(
               setup.fundingLevel, newPositionToPlayerId, gameLog
             ))} />
-            <p></p>
 
-            <Typography variant="h3" component="h3" gutterBottom>
+            <T variant="h3" >
               Game Setup
-            </Typography>
+            </T>
             Follow the <Link href="https://www.boardgamebarrister.com/unboxing-pandemic-legacy/" target="_blank" rel="noopener">Legacy Season 1 setup guide </Link>:
 
-            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
+            <T variant="h5" >
               Step 4: Infect 9 cities
-            </Typography>
+            </T>
             <Paper>
               <List>
                 <InitialInfectionsLog parentState={setup} setParentState={setSetupWithTimestamp}></InitialInfectionsLog>
@@ -155,16 +158,12 @@ export default function App (): JSX.Element {
             </Paper>
             <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
 
-            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
+            <T variant="h5" >
               Step 6: Add funded events to player deck and deal cards
-            </Typography>
+            </T>
             <TextField
               label="Funding Level"
-              variant="filled"
               type="number"
-              InputLabelProps={{
-                shrink: true
-              }}
               value={setup.fundingLevel}
               onChange={(event) => {
                 setSetup(
@@ -178,9 +177,9 @@ export default function App (): JSX.Element {
               }
               }
             />
-            <p></p>
+
             Adding funded events, you should have <b>{48 + setup.fundingLevel} </b> player cards (= funding level + 48 city cards, 12 of each color). Deal two cards to each player. (This page assumes 4 players)
-            <p></p>
+
             Cards dealt:
             <Paper>
               <List>
@@ -188,35 +187,35 @@ export default function App (): JSX.Element {
               </List>
             </Paper>
             <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
-            <p></p>
+
             Split the remaining {totalPlayerCards - 5} cards into 5
             piles of sizes {pileSizes.map(n => (n - 1)).join(', ')}. Add one <span style={{ color: 'red' }}>Epidemic</span>{' '}
             card to each.
 
-            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>
+            <T variant="h5" >
               Step 10: Player Order
-            </Typography>
-            <p></p>
+            </T>
+
             Drag to reorder players
             <DraggableAvatarStack parentState={setup} setParentState={setSetupWithTimestamp} regenGameLog={(newPositionToPlayerId: number[]) => setGameLog(genGameLog(
               setup.fundingLevel, newPositionToPlayerId, gameLog
             ))} />
 
-            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>Game Log</Typography>
+            <T variant="h5" >Game Log</T>
             <Paper>
               <List>
-                <GameLog minWidth={60} parentState={setup} setParentState={setSetupWithTimestamp} gameLog={gameLog} setGameLog={setGameLogWithTimestamp} showPositions/>
+                <GameLog minWidth={60} parentState={setup} setParentState={setSetupWithTimestamp} gameLog={gameLog} setGameLog={setGameLogWithTimestamp} showPositions />
               </List>
             </Paper>
             <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
 
-            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Inferences </Typography>
+            <T variant="h5" > Inferences </T>
             <Inferences parentState={setup} gameLog={gameLog} isDebug={isDebug}></Inferences>
 
-            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'> Glossary </Typography>
+            <T variant="h5" > Glossary </T>
             <Glossary />
 
-            <Typography variant="h5" component="h1" gutterBottom marginTop='1em'>(Debug) State</Typography>
+            <T variant="h5" >(Debug) State</T>
             <Debug setup={setup} setSetup={setSetup} gameLog={gameLog} setGameLog={setGameLog} />
           </>
           )}
@@ -253,7 +252,7 @@ function Debug ({ setup, setSetup, gameLog, setGameLog }: TDebugProps): JSX.Elem
 
   return (
     <>
-      <Button variant="contained" onClick={() => {
+      <Button onClick={() => {
         setSetup({
           ...setup,
           fundingLevel: 4,
@@ -278,7 +277,7 @@ function Debug ({ setup, setSetup, gameLog, setGameLog }: TDebugProps): JSX.Elem
         })
         setGameLog(newGameLog)
       }}>Load Test State</Button>
-      <p></p>
+
       <Button onClick={() => {
         setDebugTextArea(JSON.stringify(setup, null, 2))
       }}>
@@ -286,7 +285,7 @@ function Debug ({ setup, setSetup, gameLog, setGameLog }: TDebugProps): JSX.Elem
       <Button onClick={() => {
         setSetup(JSON.parse(debugTextArea))
       }}>Set state (dangerously) from Text Area</Button>
-      <p></p>
+
       <TextareaAutosize
         minRows={5}
         style={{ width: '100%' }}
