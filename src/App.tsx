@@ -130,27 +130,19 @@ export default function App (): JSX.Element {
         <T></T>
         <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
 
-        <Divider variant="middle" sx={{ mt: 2 }}/>
+        <Divider variant="middle" sx={{ mt: 2 }} />
 
         {isLoaded &&
-          (<><T variant="h5">
-            Players:
-          </T>
-
-            <h5>Players:
-            </h5>
+          (<>
+            <T variant="h5"> Players: </T>
             <DraggableAvatarStack parentState={setup} setParentState={setSetupWithTimestamp} regenGameLog={(newPositionToPlayerId: number[]) => setGameLog(genGameLog(
               setup.fundingLevel, newPositionToPlayerId, gameLog
             ))} />
 
-            <T variant="h3" >
-              Game Setup
-            </T>
+            <T variant="h3"> Game Setup </T>
             Follow the <Link href="https://www.boardgamebarrister.com/unboxing-pandemic-legacy/" target="_blank" rel="noopener">Legacy Season 1 setup guide </Link>:
 
-            <T variant="h5" >
-              Step 4: Infect 9 cities
-            </T>
+            <T variant="h5">Step 4: Infect 9 cities</T>
             <Paper>
               <List>
                 <InitialInfectionsLog parentState={setup} setParentState={setSetupWithTimestamp}></InitialInfectionsLog>
@@ -158,22 +150,14 @@ export default function App (): JSX.Element {
             </Paper>
             <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
 
-            <T variant="h5" >
-              Step 6: Add funded events to player deck and deal cards
-            </T>
+            <T variant="h5">Step 6: Add funded events to player deck and deal cards</T>
             <TextField
               label="Funding Level"
               type="number"
               value={setup.fundingLevel}
               onChange={(event) => {
-                setSetup(
-                  {
-                    ...setup,
-                    fundingLevel: Number(event.target.value)
-                  })
-                setGameLog(genGameLog(
-                  Number(event.target.value), setup.positionToPlayerId, gameLog
-                ))
+                setSetup({ ...setup, fundingLevel: Number(event.target.value) })
+                setGameLog(genGameLog(Number(event.target.value), setup.positionToPlayerId, gameLog))
               }
               }
             />
@@ -183,7 +167,7 @@ export default function App (): JSX.Element {
             Cards dealt:
             <Paper>
               <List>
-                <InitialPlayerCardsLog minWidth={60} parentState={setup} setParentState={setSetupWithTimestamp}></InitialPlayerCardsLog>
+                <InitialPlayerCardsLog minWidth={60} parentState={setup} setParentState={setSetupWithTimestamp} />
               </List>
             </Paper>
             <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
@@ -192,16 +176,14 @@ export default function App (): JSX.Element {
             piles of sizes {pileSizes.map(n => (n - 1)).join(', ')}. Add one <span style={{ color: 'red' }}>Epidemic</span>{' '}
             card to each.
 
-            <T variant="h5" >
-              Step 10: Player Order
-            </T>
+            <T variant="h5"> Step 10: Player Order </T>
 
             Drag to reorder players
             <DraggableAvatarStack parentState={setup} setParentState={setSetupWithTimestamp} regenGameLog={(newPositionToPlayerId: number[]) => setGameLog(genGameLog(
               setup.fundingLevel, newPositionToPlayerId, gameLog
             ))} />
 
-            <T variant="h5" >Game Log</T>
+            <T variant="h5"> Game Log </T>
             <Paper>
               <List>
                 <GameLog minWidth={60} parentState={setup} setParentState={setSetupWithTimestamp} gameLog={gameLog} setGameLog={setGameLogWithTimestamp} showPositions />
@@ -209,18 +191,18 @@ export default function App (): JSX.Element {
             </Paper>
             <LastUpdatedText lastUpdatedByUser={lastUpdatedByUser} lastUpdatedTimestamp={lastUpdatedTimestamp} />
 
-            <T variant="h5" > Inferences </T>
+            <T variant="h5"> Inferences </T>
             <Inferences parentState={setup} gameLog={gameLog} isDebug={isDebug}></Inferences>
 
-            <T variant="h5" > Glossary </T>
+            <T variant="h5"> Glossary </T>
             <Glossary />
 
-            <T variant="h5" >(Debug) State</T>
+            <T variant="h5"> (Debug) State </T>
             <Debug setup={setup} setSetup={setSetup} gameLog={gameLog} setGameLog={setGameLog} />
           </>
           )}
-      </Box >
-    </Container >
+      </Box>
+    </Container>
   )
 }
 
