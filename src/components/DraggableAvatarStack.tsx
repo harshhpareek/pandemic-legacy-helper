@@ -7,6 +7,7 @@ import {
 } from 'react-beautiful-dnd'
 import { pawnColor, TGameSetup, TPawnColor } from '../types'
 import NameDialog from './NameDialog'
+import update from 'immutability-helper'
 
 export function stringAvatar (name: string, color: TPawnColor): { sx: { bgcolor: string }, children: string } {
   return {
@@ -29,25 +30,28 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
     this.onDragEnd = this.onDragEnd.bind(this)
   }
 
+  newPlayerId (position: number, sourceIdx: number, destinationIdx: number, oldPositionToPlayerId: number[], playerId: number): number {
+    if (position === destinationIdx) {
+      return oldPositionToPlayerId[destinationIdx]
+    }
+    if ((position < sourceIdx && position < destinationIdx) || (position > sourceIdx && position > destinationIdx)) {
+      return playerId
+    } else if (position <= sourceIdx && position > destinationIdx) {
+      // position - 1 is not OOB because position is strictly greater than destination.index, and will be at least 1
+      return oldPositionToPlayerId[position - 1]
+    } else if (position >= sourceIdx && position < destinationIdx) {
+      // position + 1 is not OOB of Array because position is strictly less than destination.index, and will be at worst the 2nd last element
+      return oldPositionToPlayerId[position + 1]
+    }
+    // Should never happen. This will crash the program
+    return -1
+  }
+
   onDragEnd ({ destination, source }: DropResult): void { // dropped outside the list
     if (destination === undefined || destination === null) { return }
     const oldPositionToPlayerId = this.props.parentState.positionToPlayerId
-    const newPositionToPlayerId = oldPositionToPlayerId.map((playerId, position) => {
-      if (position === destination.index) {
-        return oldPositionToPlayerId[source.index]
-      }
-      if ((position < source.index && position < destination.index) || (position > source.index && position > destination.index)) {
-        return playerId
-      } else if (position <= source.index && position > destination.index) {
-        // position - 1 is not OOB because position is strictly greater than destination.index, and will be at least 1
-        return oldPositionToPlayerId[position - 1]
-      } else if (position >= source.index && position < destination.index) {
-        // position + 1 is not OOB of Array because position is strictly less than destination.index, and will be at worst the 2nd last element
-        return oldPositionToPlayerId[position + 1]
-      }
-      // Should never happen. This will crash the program
-      return -1
-    })
+    const newPositionToPlayerId = oldPositionToPlayerId.map((playerId, position) =>
+      this.newPlayerId(position, source.index, destination.index, oldPositionToPlayerId, playerId))
     this.props.setParentState({
       ...this.props.parentState,
       positionToPlayerId: newPositionToPlayerId
@@ -84,10 +88,10 @@ export default class DraggableAvatarStack extends React.Component<TAvatarProps, 
                             color={playerColors[playerId]}
                             onClose={() => { setShowNameDialog(false) }}
                             onChangeName={(name: string) => {
-                              this.props.setParentState({ ...this.props.parentState, players: players.map((oldName, j) => (j === playerId ? name : oldName)) })
+                              this.props.setParentState(update(this.props.parentState, { players: { [playerId]: { $set: name } } }))
                             }}
                             onChangeColor={(color: TPawnColor) => {
-                              this.props.setParentState({ ...this.props.parentState, playerColors: playerColors.map((oldColor, j) => (j === playerId ? color : oldColor)) })
+                              this.props.setParentState(update(this.props.parentState, { playerColors: { [playerId]: { $set: color } } }))
                             }} />
                           <Avatar component={Paper} elevation={5} {...stringAvatar(players[playerId], playerColors[playerId])} onClick={() => { setShowNameDialog(true) }} />
                         </div>)}
