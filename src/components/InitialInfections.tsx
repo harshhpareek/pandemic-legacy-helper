@@ -11,7 +11,6 @@ interface InitialInfectionsLogProps {
 export default class InitialInfectionsLog extends React.Component<InitialInfectionsLogProps, {}> {
   render (): React.ReactNode {
     const infections = this.props.parentState.initialInfections
-    console.log(this.props.parentState)
     return <>
       {infections.map((card, i) => {
         return (<ListItem key={i}>

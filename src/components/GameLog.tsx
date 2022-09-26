@@ -6,7 +6,6 @@ import { stringAvatar } from './DraggableAvatarStack'
 import InitialInfectionsLog from './InitialInfections'
 import InitialPlayerCardsLog from './InitialPlayerCards'
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-import InfectionCardChipStack from './InfectionCardChipStack'
 import update from 'immutability-helper'
 
 interface GameLogProps {
@@ -113,21 +112,23 @@ export default function GameLog (props: GameLogProps): JSX.Element {
             </>)
           }
           <ListItem>
-            <ListItemText inset
-              primary={'infected'}
-              sx={{ color: 'green' }} />
-            <InfectionCardChipStack cards={row.infectionCards} />
-          </ListItem>
-          <ListItem>
             <ListItemText
               primary={'infected'}
               sx={{ color: 'green' }} />
             <Autocomplete
               multiple
               popupIcon={null}
+              value={row.infectionCards.filter(card => card !== '_')}
+              onChange={(event, newValue) => {
+                props.setGameLog(update(
+                  history, {
+                    [histIdx]:
+                    { infectionCards: { $set: newValue } }
+                  }))
+              }}
               disableClearable
               size="small"
-              options={AllCities}
+              options={AllCities.filter(card => card !== '_')}
               renderOption={(props, option) => <li {...props} style={{ color: infectionCardColor(option) }}> {option}</li>}
               renderTags={(tagValue, getTagProps) => {
                 return tagValue.map((option, index) => (
@@ -150,40 +151,6 @@ export default function GameLog (props: GameLogProps): JSX.Element {
               )}
               sx={{ maxWidth: 250 }}
             />
-          </ListItem>
-          <ListItem>
-            <ListItemText inset
-              primary={'infected'}
-              sx={{ color: 'green' }} />
-
-            {row.infectionCards.map((card, j) => {
-              return (
-                <FormControl key={j}>
-                  <Select
-                    value={card}
-                    sx={{ color: infectionCardColor(card) }}
-                    IconComponent={() => null}
-                    onChange={(event) => {
-                      props.setGameLog(
-                        update(
-                          history, {
-                            [histIdx]:
-                          {
-                            infectionCards:
-                            {
-                              [j]: { $set: event.target.value as TInfectionCard }
-                            }
-                          }
-                          }))
-                    }}
-                  >
-                    {AllCities.map((city, j) => {
-                      return (
-                        <MenuItem key={j} sx={{ color: infectionCardColor(city) }} value={city}>{city}</MenuItem>)
-                    })}
-                  </Select >
-                </FormControl>)
-            })}
           </ListItem>
         </Box>)
     })}</>)
