@@ -10,7 +10,7 @@ export default function InfectionCardChipStack (props: TInfectionCardChipStack):
   return (
   <Stack direction="row" flexWrap='wrap'>
     {props.cards.map((card, i) =>
-        <Chip size="small" key={i} label={card} sx={{ color: infectionCardColor(card) }} />)}
+        <Chip size="small" key={i} label={card} sx={{ bgcolor: infectionCardColor(card), color: 'white', opacity: 0.8, p: 0.1, m: 0.1 }} />)}
     </Stack>
   )
 }

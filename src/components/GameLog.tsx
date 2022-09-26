@@ -1,6 +1,6 @@
-import { Avatar, FormControl, ListItem, ListItemAvatar, ListItemText, ListSubheader, MenuItem, Select } from '@mui/material'
+import { Autocomplete, Avatar, Box, Chip, Divider, FormControl, ListItem, ListItemAvatar, ListItemText, MenuItem, Select, TextField } from '@mui/material'
 import * as React from 'react'
-import { AllCities, infectionCardColor, playerCardIcon, PlayerCardTypes, TGameLog, TGameSetup, TInfectionCard, TPlayerCard } from '../types'
+import { AllCities, infectionCardColor, infectionCardType, playerCardIcon, PlayerCardTypes, TGameLog, TGameSetup, TInfectionCard, TPlayerCard } from '../types'
 import { getPlayerDeckSetup } from '../utils'
 import { stringAvatar } from './DraggableAvatarStack'
 import InitialInfectionsLog from './InitialInfections'
@@ -26,14 +26,15 @@ export default function GameLog (props: GameLogProps): JSX.Element {
   const { pileTransitions } = getPlayerDeckSetup(props.parentState.fundingLevel)
 
   return (<>
-    <ListSubheader>Initial Infections</ListSubheader>
+    <Divider>Initial Infections</Divider>
     <InitialInfectionsLog parentState={props.parentState} setParentState={props.setParentState}></InitialInfectionsLog>
-    <ListSubheader>Initial Player Cards</ListSubheader>
-    <InitialPlayerCardsLog minWidth={props.minWidth} parentState={props.parentState} setParentState={props.setParentState}></InitialPlayerCardsLog>
+    <Divider>Initial Player Cards</Divider>
+    <InitialPlayerCardsLog minWidth={props.minWidth} parentState={props.parentState} setParentState={props.setParentState} />
     {history.map((row, histIdx) => {
+      const hasEpidemic = row.playerCards.includes('Epidemic')
       return (
-        <React.Fragment key={histIdx}>
-          {(histIdx % 4 === 0) && (<ListSubheader>Round {histIdx / 4 + 1}</ListSubheader>)}
+        <Box key={histIdx} bgcolor={hasEpidemic ? 'lightpink' : 'white'}>
+          {(histIdx % 4 === 0) && (<Divider>Round {histIdx / 4 + 1}</Divider>)}
           <ListItem>
             <ListItemAvatar>
               <Avatar {...stringAvatar(players[row.playerId], playerColors[row.playerId])} />
@@ -80,7 +81,7 @@ export default function GameLog (props: GameLogProps): JSX.Element {
             })
             }
           </ListItem>
-          {row.playerCards.includes('Epidemic') && (
+          {hasEpidemic && (
             <>
               <ListItem>
                 <ListItemText inset> <b>Increase</b> num infections to 2 </ListItemText>
@@ -118,6 +119,39 @@ export default function GameLog (props: GameLogProps): JSX.Element {
             <InfectionCardChipStack cards={row.infectionCards} />
           </ListItem>
           <ListItem>
+            <ListItemText
+              primary={'infected'}
+              sx={{ color: 'green' }} />
+            <Autocomplete
+              multiple
+              popupIcon={null}
+              disableClearable
+              size="small"
+              options={AllCities}
+              renderOption={(props, option) => <li {...props} style={{ color: infectionCardColor(option) }}> {option}</li>}
+              renderTags={(tagValue, getTagProps) => {
+                return tagValue.map((option, index) => (
+                  // eslint-disable-next-line react/jsx-key
+                  <Chip sx={{
+                    bgcolor: infectionCardColor(option),
+                    color: 'white',
+                    opacity: 0.8,
+                    p: 0.1,
+                    m: 0.1,
+                    '& .MuiChip-deleteIcon': {
+                      color: 'silver'
+                    }
+                  }} size="small" {...getTagProps({ index })} label={option} />
+                ))
+              }}
+              groupBy={(option) => infectionCardType(option)}
+              renderInput={(params) => (
+                <TextField {...params} sx={{ m: 0, p: 0 }} />
+              )}
+              sx={{ maxWidth: 250 }}
+            />
+          </ListItem>
+          <ListItem>
             <ListItemText inset
               primary={'infected'}
               sx={{ color: 'green' }} />
@@ -151,7 +185,6 @@ export default function GameLog (props: GameLogProps): JSX.Element {
                 </FormControl>)
             })}
           </ListItem>
-
-        </React.Fragment>)
+        </Box>)
     })}</>)
 }

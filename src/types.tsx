@@ -134,7 +134,26 @@ export type TYellowInfectionCard = typeof YellowCities[number]
 export type TRedInfectionCard = typeof RedCities[number]
 export type TInfectionCard = typeof AllCities[number]
 
+export function infectionCardType (card: TInfectionCard): string {
+  // These are CSS colors
+  if (BlueCities.find((city) => card === city) !== undefined) {
+    return 'Blue'
+  }
+  if (BlackCities.find((city) => card === city) !== undefined) {
+    return 'Black'
+  }
+  if (YellowCities.find((city) => card === city) !== undefined) {
+    return 'Yellow'
+  }
+  if (RedCities.find((city) => card === city) !== undefined) {
+    return 'Red'
+  }
+  // This should only be '_'
+  return ''
+}
+
 export function infectionCardColor (card: TInfectionCard): string {
+  // These are CSS colors
   if (BlueCities.find((city) => card === city) !== undefined) {
     return 'blue'
   }
@@ -142,13 +161,13 @@ export function infectionCardColor (card: TInfectionCard): string {
     return 'brown'
   }
   if (YellowCities.find((city) => card === city) !== undefined) {
-    return 'orange'
+    return 'Peru'
   }
   if (RedCities.find((city) => card === city) !== undefined) {
     return 'red'
   }
   // This should only be '_'
-  return 'black'
+  return 'grey'
 }
 
 export function playerCardIcon (card: TPlayerCard): JSX.Element {

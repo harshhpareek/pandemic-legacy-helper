@@ -46,9 +46,10 @@ const theme: ThemeOptions = {
         sx: {
           // iPhone X dimensions are 375x812 px
           maxWidth: 360,
-          maxHeight: 800,
+          maxHeight: 400,
           position: 'relative',
           overflow: 'auto',
+          p: 0,
           '& ul': { padding: 0 }
         }
       }
