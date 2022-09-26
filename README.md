@@ -4,7 +4,10 @@ Hosted at <https://pandemic-legacy-helper.vercel.app/>
 
 ## Setup
 
-Set up a project on Firebase, create a Realtime DB. Deploy this to Vercel and set the following environment variables (on Vercel):
+Skipping over a lot of details that should be available online:
+
+1. Set up a project on Firebase. Create a Realtime DB and create credentials.
+2. Deploy to Vercel and set the following environment variables (on Vercel):
 
 ```env
 REACT_APP_FIREBASE_MEASUREMENT_ID="..."
@@ -13,14 +16,17 @@ REACT_APP_FIREBASE_MESSAGING_SENDER_ID="..."
 REACT_APP_FIREBASE_API_KEY="..."
 ```
 
-To run locally,
+Then, to run locally,
 
 ```bash
 npm install
 npm install -g vercel
+# Do the `git clone`
+# Set up Vercel project
 vercel link
 vercel env pull
-npm run dev
+# npm start does not work, Use:
+npm run dev 
 ```
 
 ## Testing
